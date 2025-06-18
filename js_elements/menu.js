@@ -55,24 +55,19 @@ function drawMainMenuFace(ctx, size) {
   ctx.shadowColor = "#000a";
   ctx.shadowBlur = 8;
 
-  // Top (About Me)
   ctx.fillText("About Me", size/2, 56);
-  // Bottom (Academics)
   ctx.fillText("Academics", size/2, size - 56);
-  // Right (Personal Projects)
   ctx.save();
   ctx.translate(size - 56, size/2);
   ctx.rotate(Math.PI / 2);
   ctx.fillText("Personal Projects", 0, 0);
   ctx.restore();
-  // Left (Contact Me)
   ctx.save();
   ctx.translate(56, size/2);
   ctx.rotate(-Math.PI / 2);
   ctx.fillText("Contact Me", 0, 0);
   ctx.restore();
 
-  // Rim border for extra glass effect
   ctx.strokeStyle = "#60b3ff88";
   ctx.lineWidth = 5;
   ctx.strokeRect(22, 22, size-44, size-44);
@@ -114,7 +109,6 @@ function makeIridescentRimTexture() {
   const c = document.createElement('canvas');
   c.width = c.height = size;
   const ctx = c.getContext('2d');
-  // Glowing rim with iridescent colors
   for (let i = 0; i < 16; ++i) {
     let color = `hsl(${200 + i * 9}, 86%, 65%)`;
     ctx.strokeStyle = color;
@@ -122,7 +116,6 @@ function makeIridescentRimTexture() {
     ctx.globalAlpha = 0.13 + i * 0.017;
     ctx.strokeRect(18 + i, 18 + i, size - (18 + i) * 2, size - (18 + i) * 2);
   }
-  // Radial iridescent center
   const grad = ctx.createRadialGradient(size/2, size/2, size/5, size/2, size/2, size/1.4);
   grad.addColorStop(0, "#b7f1ee20");
   grad.addColorStop(0.6, "#3e5ca822");
@@ -144,7 +137,6 @@ const renderer = new THREE.WebGLRenderer({canvas: document.getElementById("cube-
 renderer.setClearColor(0x000000, 0);
 renderer.setSize(width, height);
 
-// Fake env reflection: blue-to-purple gradient
 const pmremGenerator = new THREE.PMREMGenerator(renderer);
 const gradientCanvas = document.createElement('canvas');
 gradientCanvas.width = gradientCanvas.height = 128;
@@ -165,7 +157,6 @@ const spot = new THREE.SpotLight(0xa4ccff, 1.12, 7, Math.PI/2, 0.4, 1.4);
 spot.position.set(4, 6, 8);
 scene.add(spot);
 
-// === Cube Material (GameCube glass) ===
 const rimTex = makeIridescentRimTexture();
 
 function makeGCubeMat(faceTexture) {
@@ -201,57 +192,61 @@ const materials = [
 const cube = new THREE.Mesh(geometry, materials);
 scene.add(cube);
 
-// === Menu State/Rotation Logic ===
-let currentFace = 0; // 0 = main menu, 1 = projects, 2 = academics, 3 = contact, 4 = about
-let targetRotation = { x: 0, y: 0 };
+// === Menu State/Rotation Logic (Quaternion version) ===
+let currentFace = 0; // 0 = front, 1 = right, 2 = back, 3 = left, 4 = top
+let targetQuat = new THREE.Quaternion();
+const FACE_ROT = [
+  // Each face's quaternion relative to cube's default orientation
+  new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, 0)),                     // FRONT
+  new THREE.Quaternion().setFromEuler(new THREE.Euler(0, -Math.PI / 2, 0)),          // RIGHT
+  new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI, 0)),               // BACK (academics)
+  new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 2, 0)),           // LEFT
+  new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI / 2, 0, 0)),          // TOP (about)
+];
 
-function getFaceRotation(idx) {
-  switch(idx) {
-    case 0: return { x: 0, y: 0 };                      // Main menu (front)
-    case 1: return { x: 0, y: -Math.PI / 2 };            // Right (projects)
-    case 2: return { x: Math.PI, y: 0 };                 // Back (academics) flips up
-    case 3: return { x: 0, y: Math.PI / 2 };             // Left (contact)
-    case 4: return { x: -Math.PI / 2, y: 0 };            // Top (about)
-    default: return { x: 0, y: 0 };
-  }
-}
+// For "wobble"
+let wobbleTime = 0;
 
+// === Animation loop (quaternion interpolation + wobble always) ===
 function animate() {
-  cube.rotation.x += (targetRotation.x - cube.rotation.x) * 0.14;
-  cube.rotation.y += (targetRotation.y - cube.rotation.y) * 0.14;
-
-  const t = performance.now() * 0.001;
-  if(currentFace === 0) {
-    cube.rotation.x += Math.sin(t * 1.13) * 0.005;
-    cube.rotation.y += Math.cos(t * 1.37) * 0.005;
-    cube.position.y = Math.sin(t * 1.35) * 0.07;
-  } else {
-    cube.position.y = 0;
-  }
-
-  renderer.render(scene, camera);
   requestAnimationFrame(animate);
+
+  // Interpolate quaternion (cube rotation)
+  cube.quaternion.slerp(targetQuat, 0.13);
+
+  // Always apply wobble for "alive" look
+  wobbleTime = performance.now() * 0.001;
+  let wobbleX = Math.sin(wobbleTime * 1.12) * 0.035;
+  let wobbleY = Math.cos(wobbleTime * 1.26) * 0.035;
+  let wobbleEuler = new THREE.Euler(wobbleX, wobbleY, 0, "XYZ");
+  let wobbleQ = new THREE.Quaternion().setFromEuler(wobbleEuler);
+
+  // Compose: target rotation * wobble
+  cube.quaternion.multiplyQuaternions(targetQuat, wobbleQ);
+
+  cube.position.y = Math.sin(wobbleTime * 1.13) * 0.07;
+  renderer.render(scene, camera);
 }
 animate();
 
-// === Keyboard Navigation (GameCube logic) ===
+// === Keyboard Navigation with proper logic ===
 document.addEventListener('keydown', e => {
-  if (currentFace === 0) { // main menu, go to sections
-    if (e.key === "ArrowUp") gotoFace(4); // About Me (top)
-    if (e.key === "ArrowRight") gotoFace(1); // Projects (right)
-    if (e.key === "ArrowDown") gotoFace(2); // Academics (flips up to back face)
-    if (e.key === "ArrowLeft") gotoFace(3); // Contact (left)
+  if (currentFace === 0) {
+    if (e.key === "ArrowUp") gotoFace(4);     // About Me (top)
+    if (e.key === "ArrowRight") gotoFace(1);  // Projects (right)
+    if (e.key === "ArrowDown") gotoFace(2);   // Academics (back, flips up)
+    if (e.key === "ArrowLeft") gotoFace(3);   // Contact (left)
   } else {
-    // Each info face, pressing the opposite direction returns to menu
-    if (currentFace === 4 && e.key === "ArrowDown") gotoFace(0); // About Me: Down returns
-    if (currentFace === 1 && e.key === "ArrowLeft") gotoFace(0); // Projects: Left returns
-    if (currentFace === 2 && e.key === "ArrowUp") gotoFace(0);   // Academics: Up returns
-    if (currentFace === 3 && e.key === "ArrowRight") gotoFace(0); // Contact: Right returns
-    if (e.key === "Escape") gotoFace(0); // Escape always returns
+    // Each face returns with opposite direction only
+    if (currentFace === 4 && e.key === "ArrowDown") gotoFace(0);   // About Me: Down returns
+    if (currentFace === 1 && e.key === "ArrowLeft") gotoFace(0);   // Projects: Left returns
+    if (currentFace === 2 && e.key === "ArrowUp") gotoFace(0);     // Academics: Up returns
+    if (currentFace === 3 && e.key === "ArrowRight") gotoFace(0);  // Contact: Right returns
+    if (e.key === "Escape") gotoFace(0);
   }
 });
 
-// === Mouse Click to Activate Menu Edge ===
+// === Mouse Click to Activate Edge ===
 renderer.domElement.addEventListener('click', function(e) {
   if(currentFace !== 0) return;
   const rect = renderer.domElement.getBoundingClientRect();
@@ -279,12 +274,11 @@ renderer.domElement.addEventListener('click', function(e) {
 });
 
 function gotoFace(idx) {
-  targetRotation = getFaceRotation(idx);
+  targetQuat.copy(FACE_ROT[idx]);
   currentFace = idx;
   updateInfoPanel(idx);
 }
 
-// === Info panel shows content for active face ===
 function updateInfoPanel(idx) {
   const infoDiv = document.getElementById('cube-info');
   if(idx === 0) {
@@ -303,4 +297,3 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(width, height);
 });
-
