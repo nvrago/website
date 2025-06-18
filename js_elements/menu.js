@@ -28,13 +28,12 @@ const sections = [
     info: "Introduce yourself, skills, and interests.",
     draw: ctx => drawSectionFace(ctx, "About Me", "Introduce yourself, skills, and interests.")
   },
-  { // 5: BOTTOM
+  { // 5: BOTTOM (not used)
     face: "empty",
     draw: ctx => drawBlankFace(ctx)
   }
 ];
 
-// -- Helper to make a canvas texture with custom drawing --
 function makeFaceTexture(drawFn) {
   const size = 600;
   const canvas = document.createElement('canvas');
@@ -44,7 +43,6 @@ function makeFaceTexture(drawFn) {
   return new THREE.CanvasTexture(canvas);
 }
 
-// -- Draw main menu face with 4 edge labels --
 function drawMainMenuFace(ctx, size) {
   ctx.fillStyle = "#202735";
   ctx.fillRect(0, 0, size, size);
@@ -58,17 +56,14 @@ function drawMainMenuFace(ctx, size) {
 
   // Top (About Me)
   ctx.fillText("About Me", size/2, 56);
-
   // Bottom (Academics)
   ctx.fillText("Academics", size/2, size - 56);
-
   // Right (Personal Projects)
   ctx.save();
   ctx.translate(size - 56, size/2);
   ctx.rotate(Math.PI / 2);
   ctx.fillText("Personal Projects", 0, 0);
   ctx.restore();
-
   // Left (Contact Me)
   ctx.save();
   ctx.translate(56, size/2);
@@ -76,13 +71,11 @@ function drawMainMenuFace(ctx, size) {
   ctx.fillText("Contact Me", 0, 0);
   ctx.restore();
 
-  // Border (optional)
   ctx.strokeStyle = "#60b3ff88";
   ctx.lineWidth = 5;
   ctx.strokeRect(22, 22, size-44, size-44);
 }
 
-// -- Draw a section face with a title and info/content (centered) --
 function drawSectionFace(ctx, title, content) {
   const size = 600;
   ctx.fillStyle = "#202735";
@@ -100,7 +93,6 @@ function drawSectionFace(ctx, title, content) {
   ctx.textAlign = "center";
   ctx.textBaseline = "top";
   ctx.shadowBlur = 4;
-  // Allow HTML in content
   let lines = content.replace(/<br\s*\/?>/g, "\n").split("\n");
   let y = 180;
   for (let line of lines) {
@@ -109,16 +101,13 @@ function drawSectionFace(ctx, title, content) {
   }
 }
 
-// -- Blank face for bottom (not used) --
 function drawBlankFace(ctx, size) {
   ctx.fillStyle = "#202735";
   ctx.fillRect(0, 0, size, size);
 }
 
-// --- Create cube with each face a different section/menu ---
 const geometry = new THREE.BoxGeometry(2.2, 2.2, 2.2);
 const materials = [
-  // Order: right, left, top, bottom, front, back
   new THREE.MeshPhysicalMaterial({ map: makeFaceTexture(sections[1].draw), ...sharedCubeMatProps() }), // right (projects)
   new THREE.MeshPhysicalMaterial({ map: makeFaceTexture(sections[3].draw), ...sharedCubeMatProps() }), // left (contact)
   new THREE.MeshPhysicalMaterial({ map: makeFaceTexture(sections[4].draw), ...sharedCubeMatProps() }), // top (about)
@@ -160,13 +149,20 @@ scene.add(cube);
 let currentFace = 0; // 0 = main menu, 1 = projects, 2 = academics, 3 = contact, 4 = about
 let targetRotation = { x: 0, y: 0 };
 
+// Which face for which direction
+const FACE_INDEX = {
+  FRONT: 0,
+  RIGHT: 1,
+  BACK: 2,
+  LEFT: 3,
+  TOP: 4,
+};
+
 function getFaceRotation(idx) {
-  // idx: 0=front(main menu), 1=right, 2=back, 3=left, 4=top, 5=bottom
-  // We only use: 0 (front), 1 (right), 2 (back), 3 (left), 4 (top)
   switch(idx) {
-    case 0: return { x: 0, y: 0 };                      // Main menu
+    case 0: return { x: 0, y: 0 };                      // Main menu (front)
     case 1: return { x: 0, y: -Math.PI / 2 };            // Right (projects)
-    case 2: return { x: 0, y: Math.PI };                 // Back (academics)
+    case 2: return { x: Math.PI, y: 0 };                 // Back (academics) = rotate up
     case 3: return { x: 0, y: Math.PI / 2 };             // Left (contact)
     case 4: return { x: -Math.PI / 2, y: 0 };            // Top (about)
     default: return { x: 0, y: 0 };
@@ -177,7 +173,6 @@ function animate() {
   cube.rotation.x += (targetRotation.x - cube.rotation.x) * 0.14;
   cube.rotation.y += (targetRotation.y - cube.rotation.y) * 0.14;
 
-  // Subtle floating/wobble effect only on main menu
   const t = performance.now() * 0.001;
   if(currentFace === 0) {
     cube.rotation.x += Math.sin(t * 1.13) * 0.005;
@@ -192,16 +187,20 @@ function animate() {
 }
 animate();
 
-// --- Keyboard navigation for rotating to sides ---
 document.addEventListener('keydown', e => {
   // Only allow input when not animating
   if (currentFace === 0) { // main menu, go to sections
-    if (e.key === "ArrowUp") gotoFace(4);
-    if (e.key === "ArrowRight") gotoFace(1);
-    if (e.key === "ArrowDown") gotoFace(2);
-    if (e.key === "ArrowLeft") gotoFace(3);
+    if (e.key === "ArrowUp") gotoFace(4); // About Me
+    if (e.key === "ArrowRight") gotoFace(1); // Projects
+    if (e.key === "ArrowDown") gotoFace(2); // Academics (rotates UP to bottom)
+    if (e.key === "ArrowLeft") gotoFace(3); // Contact Me
   } else {
-    if (e.key === "ArrowDown" || e.key === "Escape") gotoFace(0); // Return to main menu
+    // Each info face, pressing the opposite direction returns to menu
+    if (currentFace === 4 && e.key === "ArrowDown") gotoFace(0); // About Me: Down returns
+    if (currentFace === 1 && e.key === "ArrowLeft") gotoFace(0); // Projects: Left returns
+    if (currentFace === 2 && e.key === "ArrowUp") gotoFace(0);   // Academics: Up returns
+    if (currentFace === 3 && e.key === "ArrowRight") gotoFace(0); // Contact: Right returns
+    if (e.key === "Escape") gotoFace(0); // Escape always returns
   }
 });
 
@@ -222,7 +221,6 @@ renderer.domElement.addEventListener('click', function(e) {
   const face = intersects[0].face;
   if (face.materialIndex !== 4) return; // Only respond if clicking front face
 
-  // Which region?
   const uv = intersects[0].uv;
   const u = uv.x;
   const v = 1 - uv.y;
@@ -239,7 +237,6 @@ function gotoFace(idx) {
   updateInfoPanel(idx);
 }
 
-// --- Info panel shows content for active face ---
 function updateInfoPanel(idx) {
   const infoDiv = document.getElementById('cube-info');
   if(idx === 0) {
@@ -258,4 +255,3 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(w, h);
 });
-
