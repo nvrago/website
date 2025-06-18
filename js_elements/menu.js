@@ -192,11 +192,13 @@ const materials = [
 const cube = new THREE.Mesh(geometry, materials);
 scene.add(cube);
 
-// === Menu State/Rotation Logic (Quaternion version) ===
+// === Menu State/Rotation Logic (Quaternion version with smooth transition) ===
 let currentFace = 0; // 0 = front, 1 = right, 2 = back, 3 = left, 4 = top
-let targetQuat = new THREE.Quaternion();
+let baseQuat = new THREE.Quaternion().copy(new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, 0))); // initial orientation
+let targetQuat = baseQuat.clone();
+
+// Target quaternions for each face
 const FACE_ROT = [
-  // Each face's quaternion relative to cube's default orientation
   new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, 0)),                     // FRONT
   new THREE.Quaternion().setFromEuler(new THREE.Euler(0, -Math.PI / 2, 0)),          // RIGHT
   new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI, 0)),               // BACK (academics)
@@ -207,22 +209,22 @@ const FACE_ROT = [
 // For "wobble"
 let wobbleTime = 0;
 
-// === Animation loop (quaternion interpolation + wobble always) ===
+// === Animation loop (slerp, then temp wobble for rendering) ===
 function animate() {
   requestAnimationFrame(animate);
 
-  // Interpolate quaternion (cube rotation)
-  cube.quaternion.slerp(targetQuat, 0.13);
+  // Smoothly slerp baseQuat toward targetQuat
+  baseQuat.slerp(targetQuat, 0.13);
 
-  // Always apply wobble for "alive" look
+  // Compute wobble as extra rotation
   wobbleTime = performance.now() * 0.001;
   let wobbleX = Math.sin(wobbleTime * 1.12) * 0.035;
   let wobbleY = Math.cos(wobbleTime * 1.26) * 0.035;
   let wobbleEuler = new THREE.Euler(wobbleX, wobbleY, 0, "XYZ");
   let wobbleQ = new THREE.Quaternion().setFromEuler(wobbleEuler);
 
-  // Compose: target rotation * wobble
-  cube.quaternion.multiplyQuaternions(targetQuat, wobbleQ);
+  // Apply: cube.quaternion = baseQuat * wobbleQ
+  cube.quaternion.copy(baseQuat).multiply(wobbleQ);
 
   cube.position.y = Math.sin(wobbleTime * 1.13) * 0.07;
   renderer.render(scene, camera);
@@ -297,3 +299,4 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(width, height);
 });
+
