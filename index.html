@@ -2,9 +2,160 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>GameCube Website</title>
+  <title>Rago Industries</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- xterm.js CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css" />
+  <style>
+    body {
+      background: #151c17;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+    }
+    .center-content {
+      text-align: center;
+      padding-top: 100px;
+    }
+    /* Terminal styling */
+    #terminal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1000;
+      display: none;
+      background: rgba(10,16,8,0.98);
+      box-shadow: 0 0 40px #27d22733;
+      /* CRT scanlines */
+      background-image: repeating-linear-gradient(
+        to bottom,
+        rgba(55,255,55,0.07) 0 2px,
+        transparent 2px 4px
+      );
+      border: 2px solid #37ff37;
+    }
+    .watermark {
+      position: absolute;
+      top: 30px;
+      right: 40px;
+      font-size: 2rem;
+      color: rgba(55,255,55,0.08);
+      font-family: 'Courier New', Courier, monospace;
+      user-select: none;
+      pointer-events: none;
+      letter-spacing: 8px;
+      transform: rotate(-7deg);
+    }
+    .terminal-hint {
+      color: #39f76d;
+      font-size: 1.1rem;
+      opacity: 0.7;
+    }
+  </style>
 </head>
 <body>
-  <h1>Hello, GameCube world!</h1>
+  <div class="center-content">
+    <h1>Welcome to Rago Industries</h1>
+    <p>This is the main page. <br>
+      <span class="terminal-hint">Hint: Press <b>Ctrl + Alt + R</b> to access the terminal layer.</span>
+    </p>
+  </div>
+  <div id="terminal">
+    <div class="watermark">CLASSIFIED</div>
+  </div>
+  <!-- xterm.js JS -->
+  <script src="https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js"></script>
+  <script>
+    // Terminal setup
+    const term = new Terminal({
+      theme: {
+        background: '#121812',
+        foreground: '#37ff37',
+        cursor: '#8fff8f',
+        selection: '#274d27'
+      },
+      fontFamily: 'Fira Mono, monospace',
+      fontSize: 17,
+      cursorBlink: true,
+      rows: 32,
+    });
+
+    // Open the terminal in the hidden div
+    term.open(document.getElementById('terminal'));
+    term.writeln('\x1b[1;32m----------------------------------------------\x1b[0m');
+    term.writeln('\x1b[1;32m   RAGO INDUSTRIES - COLD WAR OPS TERMINAL   \x1b[0m');
+    term.writeln('\x1b[1;32m----------------------------------------------\x1b[0m');
+    term.writeln('For assistance, type \x1b[1mhelp\x1b[0m\n');
+
+    function prompt() {
+      term.write('\r\nrago@mil-cmd:$ ');
+    }
+
+    prompt();
+
+    let command = '';
+    term.onData(e => {
+      if (e.charCodeAt(0) === 13) { // Enter
+        handleCommand(command.trim());
+        command = '';
+        prompt();
+      } else if (e.charCodeAt(0) === 127) { // Backspace
+        if (command.length > 0) {
+          term.write('\b \b');
+          command = command.slice(0, -1);
+        }
+      } else {
+        term.write(e);
+        command += e;
+      }
+    });
+
+    function handleCommand(cmd) {
+      switch(cmd) {
+        case 'help':
+          term.writeln('\nAvailable commands: about, projects, clear, help, exit');
+          break;
+        case 'about':
+          term.writeln('\nRago Industries: A (fictional) Cold War research group. Enter `projects` to see top-secret programs.');
+          break;
+        case 'projects':
+          term.writeln('\n- Project ORBIT: Satellite intel analysis\n- Project ZEPHYR: Stealth tech dev\n- Project MIRAGE: Information operations');
+          break;
+        case 'clear':
+          term.clear();
+          break;
+        case 'exit':
+          hideTerminal();
+          break;
+        case '':
+          break;
+        default:
+          term.writeln(`\nCommand not found: ${cmd}`);
+      }
+    }
+
+    // Terminal show/hide logic (Ctrl+Alt+R)
+    function showTerminal() {
+      document.getElementById('terminal').style.display = 'block';
+      term.focus();
+    }
+    function hideTerminal() {
+      document.getElementById('terminal').style.display = 'none';
+    }
+
+    document.addEventListener('keydown', function(e) {
+      // Show terminal: Ctrl+Alt+R
+      if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'r') {
+        showTerminal();
+      }
+      // Hide terminal: Escape key
+      if (e.key === "Escape" && document.getElementById('terminal').style.display === 'block') {
+        hideTerminal();
+      }
+    });
+  </script>
 </body>
 </html>
