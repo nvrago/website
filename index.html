@@ -79,7 +79,7 @@
 
     // Password prompt before showing terminal
     let terminalUnlocked = false;
-    const PASSWORD = "secret"; // Change this to whatever you want!
+    const PASSWORD = "fargo"; // Change this to whatever you want!
 
     function askForPassword() {
       term.clear();
@@ -88,7 +88,7 @@
       term.onData(function inputHandler(e) {
         if (!terminalUnlocked) {
           if (e.charCodeAt(0) === 13) { // Enter
-            if (entered === LELO) {
+            if (entered === PASSWORD) {
               terminalUnlocked = true;
               term.offData(inputHandler);
               fakeBootSequence();
