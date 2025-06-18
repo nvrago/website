@@ -2,32 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Rago Industries Menu</title>
+  <title>Rago Industries Menu (Three.js Cube)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="css_elements/style.css">
 </head>
 <body>
-  <main id="menu-container" aria-label="Main Navigation">
-    <button class="menu-cube" id="menu-about">
-      <span class="menu-icon" aria-hidden="true">🧑</span>
-      <span class="menu-label">About Me</span>
-    </button>
-    <button class="menu-cube" id="menu-resume">
-      <span class="menu-icon" aria-hidden="true">💼</span>
-      <span class="menu-label">Resume/Socials</span>
-    </button>
-    <button class="menu-cube" id="menu-projects">
-      <span class="menu-icon" aria-hidden="true">🛠️</span>
-      <span class="menu-label">Projects</span>
-    </button>
-    <button class="menu-cube" id="menu-academics">
-      <span class="menu-icon" aria-hidden="true">📚</span>
-      <span class="menu-label">Academics</span>
-    </button>
-    <!-- Add more menu options here if needed -->
-  </main>
+  <div id="cube-container">
+    <canvas id="cube-canvas"></canvas>
+    <div id="menu-overlay">
+      <p id="hint">Click a side or use arrow keys to rotate. Press Enter to select.</p>
+    </div>
+  </div>
   <footer>
     <small>Portfolio project by Rago.</small>
   </footer>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+  <script src="js_elements/menu.js"></script>
 </body>
 </html>
+
