@@ -143,3 +143,69 @@
         if (!terminalUnlocked) return;
         if (e.charCodeAt(0) === 13) { // Enter
           handleCommand(command.trim());
+          command = '';
+          prompt();
+        } else if (e.charCodeAt(0) === 127) { // Backspace
+          if (command.length > 0) {
+            term.write('\b \b');
+            command = command.slice(0, -1);
+          }
+        } else {
+          term.write(e);
+          command += e;
+        }
+      });
+    }
+
+    function prompt() {
+      term.write('\r\nrago@mil-cmd:$ ');
+    }
+
+    function handleCommand(cmd) {
+      switch(cmd) {
+        case 'help':
+          term.writeln('\nAvailable commands: about, projects, clear, help, exit');
+          break;
+        case 'about':
+          term.writeln('\nRago Industries: A (fictional) Cold War research group. Enter `projects` to see top-secret programs.');
+          break;
+        case 'projects':
+          term.writeln('\n- Project ORBIT: Satellite intel analysis\n- Project ZEPHYR: Stealth tech dev\n- Project MIRAGE: Information operations');
+          break;
+        case 'clear':
+          term.clear();
+          break;
+        case 'exit':
+          hideTerminal();
+          break;
+        case '':
+          break;
+        default:
+          term.writeln(`\nCommand not found: ${cmd}`);
+      }
+    }
+
+    // Hide/show logic
+    function showTerminal() {
+      document.getElementById('terminal').style.display = 'block';
+      term.focus();
+      terminalUnlocked = false;
+      askForPassword();
+    }
+    function hideTerminal() {
+      document.getElementById('terminal').style.display = 'none';
+    }
+
+    // Secret activation: Ctrl + Alt + R
+    document.addEventListener('keydown', function(e) {
+      if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'r') {
+        showTerminal();
+      }
+      // Hide terminal: Escape key
+      if (e.key === "Escape" && document.getElementById('terminal').style.display === 'block') {
+        hideTerminal();
+      }
+    });
+  </script>
+</body>
+</html>
