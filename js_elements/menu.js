@@ -1,4 +1,4 @@
-// --- Section titles/info for each face ---
+// === GameCube Menu Cube Sections ===
 const sections = [
   { // 0: FRONT (main menu)
     face: "menu",
@@ -34,6 +34,7 @@ const sections = [
   }
 ];
 
+// === Cube Face Drawing Helpers ===
 function makeFaceTexture(drawFn) {
   const size = 600;
   const canvas = document.createElement('canvas');
@@ -71,6 +72,7 @@ function drawMainMenuFace(ctx, size) {
   ctx.fillText("Contact Me", 0, 0);
   ctx.restore();
 
+  // Rim border for extra glass effect
   ctx.strokeStyle = "#60b3ff88";
   ctx.lineWidth = 5;
   ctx.strokeRect(22, 22, size-44, size-44);
@@ -106,63 +108,108 @@ function drawBlankFace(ctx, size) {
   ctx.fillRect(0, 0, size, size);
 }
 
-const geometry = new THREE.BoxGeometry(2.2, 2.2, 2.2);
-const materials = [
-  new THREE.MeshPhysicalMaterial({ map: makeFaceTexture(sections[1].draw), ...sharedCubeMatProps() }), // right (projects)
-  new THREE.MeshPhysicalMaterial({ map: makeFaceTexture(sections[3].draw), ...sharedCubeMatProps() }), // left (contact)
-  new THREE.MeshPhysicalMaterial({ map: makeFaceTexture(sections[4].draw), ...sharedCubeMatProps() }), // top (about)
-  new THREE.MeshPhysicalMaterial({ map: makeFaceTexture(sections[5].draw), ...sharedCubeMatProps() }), // bottom (blank)
-  new THREE.MeshPhysicalMaterial({ map: makeFaceTexture(sections[0].draw), ...sharedCubeMatProps() }), // front (main menu)
-  new THREE.MeshPhysicalMaterial({ map: makeFaceTexture(sections[2].draw), ...sharedCubeMatProps() })  // back (academics)
-];
+// === Iridescent Rim Texture for EmissiveMap ===
+function makeIridescentRimTexture() {
+  const size = 600;
+  const c = document.createElement('canvas');
+  c.width = c.height = size;
+  const ctx = c.getContext('2d');
+  // Glowing rim with iridescent colors
+  for (let i = 0; i < 16; ++i) {
+    let color = `hsl(${200 + i * 9}, 86%, 65%)`;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 14 - i * 0.6;
+    ctx.globalAlpha = 0.13 + i * 0.017;
+    ctx.strokeRect(18 + i, 18 + i, size - (18 + i) * 2, size - (18 + i) * 2);
+  }
+  // Radial iridescent center
+  const grad = ctx.createRadialGradient(size/2, size/2, size/5, size/2, size/2, size/1.4);
+  grad.addColorStop(0, "#b7f1ee20");
+  grad.addColorStop(0.6, "#3e5ca822");
+  grad.addColorStop(1, "#00000011");
+  ctx.globalAlpha = 0.24;
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, size, size);
 
-function sharedCubeMatProps() {
-  return {
-    transparent: true,
-    roughness: 0.19,
-    metalness: 0.43,
-    clearcoat: 0.88,
-    reflectivity: 0.82,
-    ior: 1.39,
-    transmission: 0.13
-  };
+  return new THREE.CanvasTexture(c);
 }
 
+// === Scene/Renderer/Lighting ===
+let width = window.innerWidth, height = window.innerHeight * 0.90;
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(45, window.innerWidth/(window.innerHeight*0.9), 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(45, width/height, 0.1, 1000);
 camera.position.z = 5.2;
 
 const renderer = new THREE.WebGLRenderer({canvas: document.getElementById("cube-canvas"), antialias: true, alpha: true});
 renderer.setClearColor(0x000000, 0);
-renderer.setSize(window.innerWidth, window.innerHeight * 0.90);
+renderer.setSize(width, height);
 
-const ambient = new THREE.AmbientLight(0xffffff, 0.63);
+// Fake env reflection: blue-to-purple gradient
+const pmremGenerator = new THREE.PMREMGenerator(renderer);
+const gradientCanvas = document.createElement('canvas');
+gradientCanvas.width = gradientCanvas.height = 128;
+const gctx = gradientCanvas.getContext('2d');
+const grad = gctx.createLinearGradient(0, 0, 128, 128);
+grad.addColorStop(0, "#3851a9");
+grad.addColorStop(0.4, "#6d49a4");
+grad.addColorStop(0.7, "#88dfec");
+grad.addColorStop(1, "#232254");
+gctx.fillStyle = grad;
+gctx.fillRect(0, 0, 128, 128);
+const envMap = pmremGenerator.fromEquirectangular(new THREE.CanvasTexture(gradientCanvas)).texture;
+scene.environment = envMap;
+
+const ambient = new THREE.AmbientLight(0xffffff, 0.66);
 scene.add(ambient);
-const spot = new THREE.SpotLight(0xffffff, 1.3, 7, Math.PI/2, 0.4, 1.4);
-spot.position.set(5, 6, 7);
+const spot = new THREE.SpotLight(0xa4ccff, 1.12, 7, Math.PI/2, 0.4, 1.4);
+spot.position.set(4, 6, 8);
 scene.add(spot);
+
+// === Cube Material (GameCube glass) ===
+const rimTex = makeIridescentRimTexture();
+
+function makeGCubeMat(faceTexture) {
+  return new THREE.MeshPhysicalMaterial({
+    map: faceTexture,
+    transparent: true,
+    roughness: 0.17,
+    metalness: 0.58,
+    clearcoat: 1,
+    clearcoatRoughness: 0.10,
+    reflectivity: 0.98,
+    ior: 1.44,
+    transmission: 0.43,
+    thickness: 0.68,
+    envMap: envMap,
+    envMapIntensity: 1.25,
+    emissiveMap: rimTex,
+    emissiveIntensity: 0.32,
+    emissive: 0x44baff
+  });
+}
+
+const geometry = new THREE.BoxGeometry(2.2, 2.2, 2.2);
+const materials = [
+  makeGCubeMat(makeFaceTexture(sections[1].draw)), // right (projects)
+  makeGCubeMat(makeFaceTexture(sections[3].draw)), // left (contact)
+  makeGCubeMat(makeFaceTexture(sections[4].draw)), // top (about)
+  makeGCubeMat(makeFaceTexture(sections[5].draw)), // bottom (blank)
+  makeGCubeMat(makeFaceTexture(sections[0].draw)), // front (main menu)
+  makeGCubeMat(makeFaceTexture(sections[2].draw)), // back (academics)
+];
 
 const cube = new THREE.Mesh(geometry, materials);
 scene.add(cube);
 
-// --- Menu state/rotation logic ---
+// === Menu State/Rotation Logic ===
 let currentFace = 0; // 0 = main menu, 1 = projects, 2 = academics, 3 = contact, 4 = about
 let targetRotation = { x: 0, y: 0 };
-
-// Which face for which direction
-const FACE_INDEX = {
-  FRONT: 0,
-  RIGHT: 1,
-  BACK: 2,
-  LEFT: 3,
-  TOP: 4,
-};
 
 function getFaceRotation(idx) {
   switch(idx) {
     case 0: return { x: 0, y: 0 };                      // Main menu (front)
     case 1: return { x: 0, y: -Math.PI / 2 };            // Right (projects)
-    case 2: return { x: Math.PI, y: 0 };                 // Back (academics) = rotate up
+    case 2: return { x: Math.PI, y: 0 };                 // Back (academics) flips up
     case 3: return { x: 0, y: Math.PI / 2 };             // Left (contact)
     case 4: return { x: -Math.PI / 2, y: 0 };            // Top (about)
     default: return { x: 0, y: 0 };
@@ -187,13 +234,13 @@ function animate() {
 }
 animate();
 
+// === Keyboard Navigation (GameCube logic) ===
 document.addEventListener('keydown', e => {
-  // Only allow input when not animating
   if (currentFace === 0) { // main menu, go to sections
-    if (e.key === "ArrowUp") gotoFace(4); // About Me
-    if (e.key === "ArrowRight") gotoFace(1); // Projects
-    if (e.key === "ArrowDown") gotoFace(2); // Academics (rotates UP to bottom)
-    if (e.key === "ArrowLeft") gotoFace(3); // Contact Me
+    if (e.key === "ArrowUp") gotoFace(4); // About Me (top)
+    if (e.key === "ArrowRight") gotoFace(1); // Projects (right)
+    if (e.key === "ArrowDown") gotoFace(2); // Academics (flips up to back face)
+    if (e.key === "ArrowLeft") gotoFace(3); // Contact (left)
   } else {
     // Each info face, pressing the opposite direction returns to menu
     if (currentFace === 4 && e.key === "ArrowDown") gotoFace(0); // About Me: Down returns
@@ -204,7 +251,7 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// Click to activate regions on main menu
+// === Mouse Click to Activate Menu Edge ===
 renderer.domElement.addEventListener('click', function(e) {
   if(currentFace !== 0) return;
   const rect = renderer.domElement.getBoundingClientRect();
@@ -237,6 +284,7 @@ function gotoFace(idx) {
   updateInfoPanel(idx);
 }
 
+// === Info panel shows content for active face ===
 function updateInfoPanel(idx) {
   const infoDiv = document.getElementById('cube-info');
   if(idx === 0) {
@@ -247,11 +295,12 @@ function updateInfoPanel(idx) {
   }
 }
 
-// --- Responsive canvas ---
+// === Responsive canvas ===
 window.addEventListener('resize', () => {
-  const w = window.innerWidth;
-  const h = window.innerHeight * 0.90;
-  camera.aspect = w/h;
+  width = window.innerWidth;
+  height = window.innerHeight * 0.90;
+  camera.aspect = width/height;
   camera.updateProjectionMatrix();
-  renderer.setSize(w, h);
+  renderer.setSize(width, height);
 });
+
