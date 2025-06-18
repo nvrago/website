@@ -20,19 +20,43 @@ html, body {
   display: block;
   background: transparent;
 }
-#menu-overlay {
+.edge-label {
   position: absolute;
-  bottom: 8vh;
-  left: 0; right: 0;
+  width: 240px;
+  height: 36px;
+  left: 50%;
+  top: 20vh;
+  transform: translate(-50%, 0) rotate(0deg);
+  color: #fff;
+  font-size: 1.7rem;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  text-shadow: 0 2px 8px #000c, 0 1px 0 #223c;
+  letter-spacing: 0.01em;
   text-align: center;
   pointer-events: none;
+  z-index: 10;
+  opacity: 0.97;
+  font-weight: 500;
+  background: none;
+  transition: all 0.2s;
+  user-select: none;
 }
-#hint {
-  color: #c8d8ff;
-  font-size: 1.13rem;
+#cube-info {
+  position: absolute;
+  left: 50%;
+  top: 65vh;
+  transform: translateX(-50%);
+  width: 380px;
+  min-height: 60px;
+  background: rgba(22,24,40,0.84);
+  border-radius: 16px;
+  box-shadow: 0 3px 12px #0004;
+  color: #eaf4fc;
+  padding: 1.5em 1.2em;
+  text-align: center;
+  font-size: 1.12rem;
   font-family: 'Segoe UI', Arial, sans-serif;
-  opacity: 0.9;
-  text-shadow: 0 1px 4px #000a;
+  display: none;
 }
 footer {
   text-align: center;
