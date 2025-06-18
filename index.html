@@ -53,8 +53,7 @@
 </head>
 <body>
   <div class="center-content">
-    <h1>Welcome to Rago Industries</h1>
-    <p>This is the main page.</p>
+    <h1>test_boot_0.3</h1>
   </div>
   <div id="terminal">
     <div class="watermark">CLASSIFIED</div>
@@ -89,7 +88,7 @@
       term.onData(function inputHandler(e) {
         if (!terminalUnlocked) {
           if (e.charCodeAt(0) === 13) { // Enter
-            if (entered === PASSWORD) {
+            if (entered === LELO) {
               terminalUnlocked = true;
               term.offData(inputHandler);
               fakeBootSequence();
