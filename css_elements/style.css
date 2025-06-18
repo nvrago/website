@@ -20,27 +20,6 @@ html, body {
   display: block;
   background: transparent;
 }
-.edge-label {
-  position: absolute;
-  width: 240px;
-  height: 36px;
-  left: 50%;
-  top: 20vh;
-  transform: translate(-50%, 0) rotate(0deg);
-  color: #fff;
-  font-size: 1.7rem;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  text-shadow: 0 2px 8px #000c, 0 1px 0 #223c;
-  letter-spacing: 0.01em;
-  text-align: center;
-  pointer-events: none;
-  z-index: 10;
-  opacity: 0.97;
-  font-weight: 500;
-  background: none;
-  transition: all 0.2s;
-  user-select: none;
-}
 #cube-info {
   position: absolute;
   left: 50%;
