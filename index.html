@@ -4,14 +4,30 @@
   <meta charset="UTF-8">
   <title>Rago Industries Menu</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Make sure these paths match your folder names -->
   <link rel="stylesheet" href="css_elements/style.css">
 </head>
 <body>
-  <div id="menu-container"></div>
+  <main id="menu-container" aria-label="Main Navigation">
+    <button class="menu-cube" id="menu-about">
+      <span class="menu-icon" aria-hidden="true">🧑</span>
+      <span class="menu-label">About Me</span>
+    </button>
+    <button class="menu-cube" id="menu-resume">
+      <span class="menu-icon" aria-hidden="true">💼</span>
+      <span class="menu-label">Resume/Socials</span>
+    </button>
+    <button class="menu-cube" id="menu-projects">
+      <span class="menu-icon" aria-hidden="true">🛠️</span>
+      <span class="menu-label">Projects</span>
+    </button>
+    <button class="menu-cube" id="menu-academics">
+      <span class="menu-icon" aria-hidden="true">📚</span>
+      <span class="menu-label">Academics</span>
+    </button>
+    <!-- Add more menu options here if needed -->
+  </main>
   <footer>
     <small>Portfolio project by Rago.</small>
   </footer>
-  <script src="js_elements/menu.js"></script>
 </body>
 </html>
