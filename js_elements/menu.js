@@ -10,7 +10,7 @@ const sections = [
     info: "Showcase of your personal projects.<br>Add images, descriptions, or links here.",
     draw: ctx => drawSectionFace(ctx, "Personal Projects", "Showcase of your personal projects.<br>Add images, descriptions, or links here.")
   },
-  { // 2: BACK
+  { // 2: BOTTOM
     face: "academics",
     label: "Academics",
     info: "Your academic background and achievements.",
@@ -28,7 +28,7 @@ const sections = [
     info: "Introduce yourself, skills, and interests.",
     draw: ctx => drawSectionFace(ctx, "About Me", "Introduce yourself, skills, and interests.")
   },
-  { // 5: BOTTOM (not used)
+  { // 5: BACK (not used)
     face: "empty",
     draw: ctx => drawBlankFace(ctx)
   }
@@ -179,21 +179,21 @@ function makeGCubeMat(faceTexture) {
   });
 }
 
-const geometry = new THREE.BoxGeometry(2.2, 2.2, 2.2);
+// === MATERIALS: Academics is now on the BOTTOM face (index 2 in sections) ===
 const materials = [
-  makeGCubeMat(makeFaceTexture(sections[1].draw)), // right (projects)
-  makeGCubeMat(makeFaceTexture(sections[3].draw)), // left (contact)
-  makeGCubeMat(makeFaceTexture(sections[4].draw)), // top (about)
-  makeGCubeMat(makeFaceTexture(sections[5].draw)), // bottom (blank)
-  makeGCubeMat(makeFaceTexture(sections[0].draw)), // front (main menu)
-  makeGCubeMat(makeFaceTexture(sections[2].draw)), // back (academics)
+  makeGCubeMat(makeFaceTexture(sections[1].draw)), // right (projects)   +X
+  makeGCubeMat(makeFaceTexture(sections[3].draw)), // left (contact)    -X
+  makeGCubeMat(makeFaceTexture(sections[4].draw)), // top (about)       +Y
+  makeGCubeMat(makeFaceTexture(sections[2].draw)), // bottom (academics) -Y
+  makeGCubeMat(makeFaceTexture(sections[0].draw)), // front (main menu) +Z
+  makeGCubeMat(makeFaceTexture(sections[5].draw)), // back (blank)      -Z
 ];
 
 const cube = new THREE.Mesh(geometry, materials);
 scene.add(cube);
 
 // === Menu State/Rotation Logic (Quaternion version with smooth transition) ===
-let currentFace = 0; // 0 = front, 1 = right, 2 = back, 3 = left, 4 = top
+let currentFace = 0; // 0 = front, 1 = right, 2 = bottom (academics), 3 = left, 4 = top
 let baseQuat = new THREE.Quaternion().copy(new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, 0))); // initial orientation
 let targetQuat = baseQuat.clone();
 
@@ -201,7 +201,7 @@ let targetQuat = baseQuat.clone();
 const FACE_ROT = [
   new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, 0)),                     // FRONT
   new THREE.Quaternion().setFromEuler(new THREE.Euler(0, -Math.PI / 2, 0)),          // RIGHT
-  new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI, 0)),               // BACK (academics)
+  new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI / 2, 0, 0)),           // BOTTOM (academics) <--- FIXED
   new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 2, 0)),           // LEFT
   new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI / 2, 0, 0)),          // TOP (about)
 ];
@@ -236,7 +236,7 @@ document.addEventListener('keydown', e => {
   if (currentFace === 0) {
     if (e.key === "ArrowUp") gotoFace(4);     // About Me (top)
     if (e.key === "ArrowRight") gotoFace(1);  // Projects (right)
-    if (e.key === "ArrowDown") gotoFace(2);   // Academics (back, flips up)
+    if (e.key === "ArrowDown") gotoFace(2);   // Academics (bottom, flips up)
     if (e.key === "ArrowLeft") gotoFace(3);   // Contact (left)
   } else {
     // Each face returns with opposite direction only
@@ -300,3 +300,7 @@ window.addEventListener('resize', () => {
   renderer.setSize(width, height);
 });
 
+// === BoxGeometry must be defined after materials ===
+function BoxGeometry() {
+  return new THREE.BoxGeometry(2.2, 2.2, 2.2);
+}
