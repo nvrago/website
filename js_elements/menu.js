@@ -179,6 +179,9 @@ function makeGCubeMat(faceTexture) {
   });
 }
 
+// === THIS LINE WAS MISSING BEFORE! ===
+const geometry = new THREE.BoxGeometry(2.2, 2.2, 2.2);
+
 // === MATERIALS: Academics is now on the BOTTOM face (index 2 in sections) ===
 const materials = [
   makeGCubeMat(makeFaceTexture(sections[1].draw)), // right (projects)   +X
@@ -201,7 +204,7 @@ let targetQuat = baseQuat.clone();
 const FACE_ROT = [
   new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, 0)),                     // FRONT
   new THREE.Quaternion().setFromEuler(new THREE.Euler(0, -Math.PI / 2, 0)),          // RIGHT
-  new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI / 2, 0, 0)),           // BOTTOM (academics) <--- FIXED
+  new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI / 2, 0, 0)),           // BOTTOM (academics)
   new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 2, 0)),           // LEFT
   new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI / 2, 0, 0)),          // TOP (about)
 ];
@@ -299,8 +302,3 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(width, height);
 });
-
-// === BoxGeometry must be defined after materials ===
-function BoxGeometry() {
-  return new THREE.BoxGeometry(2.2, 2.2, 2.2);
-}
