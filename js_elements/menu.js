@@ -179,7 +179,7 @@ function makeGCubeMat(faceTexture) {
   });
 }
 
-// === THIS LINE WAS MISSING BEFORE! ===
+// THIS LINE MUST COME BEFORE MATERIALS
 const geometry = new THREE.BoxGeometry(2.2, 2.2, 2.2);
 
 // === MATERIALS: Academics is now on the BOTTOM face (index 2 in sections) ===
@@ -302,3 +302,4 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(width, height);
 });
+
