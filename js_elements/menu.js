@@ -1,40 +1,28 @@
-// === GameCube Menu Cube Sections ===
+// === GAMECUBE STARTUP ANIMATION + MENU SYSTEM ===
+
+// ==================== CONFIGURATION ====================
+const SKIP_INTRO = false; // Set to true to skip during development
+const INTRO_DURATION = 4500; // Total intro time in ms
+
+// ==================== SECTIONS DATA ====================
 const sections = [
-  { // 0: FRONT (main menu)
-    face: "menu",
-    draw: drawMainMenuFace
-  },
-  { // 1: RIGHT
-    face: "projects",
-    label: "Personal Projects",
+  { face: "menu", draw: drawMainMenuFace },
+  { face: "projects", label: "Personal Projects", 
     info: "Showcase of your personal projects.<br>Add images, descriptions, or links here.",
-    draw: ctx => drawSectionFace(ctx, "Personal Projects", "Showcase of your personal projects.\nAdd images, descriptions, or links here.")
-  },
-  { // 2: BOTTOM
-    face: "academics",
-    label: "Academics",
+    draw: ctx => drawSectionFace(ctx, "Personal Projects", "Showcase of your personal projects.\nAdd images, descriptions, or links here.") },
+  { face: "academics", label: "Academics", 
     info: "Your academic background and achievements.",
-    draw: ctx => drawSectionFace(ctx, "Academics", "Your academic background and achievements.")
-  },
-  { // 3: LEFT
-    face: "contact",
-    label: "Contact Me",
+    draw: ctx => drawSectionFace(ctx, "Academics", "Your academic background and achievements.") },
+  { face: "contact", label: "Contact Me", 
     info: "Ways to contact you (email, socials, etc).",
-    draw: ctx => drawSectionFace(ctx, "Contact Me", "Ways to contact you (email, socials, etc).")
-  },
-  { // 4: TOP
-    face: "about",
-    label: "About Me",
+    draw: ctx => drawSectionFace(ctx, "Contact Me", "Ways to contact you (email, socials, etc).") },
+  { face: "about", label: "About Me", 
     info: "Introduce yourself, skills, and interests.",
-    draw: ctx => drawSectionFace(ctx, "About Me", "Introduce yourself, skills, and interests.")
-  },
-  { // 5: BACK (not used)
-    face: "empty",
-    draw: ctx => drawBlankFace(ctx)
-  }
+    draw: ctx => drawSectionFace(ctx, "About Me", "Introduce yourself, skills, and interests.") },
+  { face: "empty", draw: ctx => drawBlankFace(ctx) }
 ];
 
-// === Cube Face Drawing Helpers ===
+// ==================== TEXTURE HELPERS ====================
 function makeFaceTexture(drawFn) {
   const size = 512;
   const canvas = document.createElement('canvas');
@@ -45,11 +33,8 @@ function makeFaceTexture(drawFn) {
 }
 
 function drawMainMenuFace(ctx, size) {
-  // More GameCube-like purple/indigo background
   ctx.fillStyle = "#1a1a2e";
   ctx.fillRect(0, 0, size, size);
-
-  // Inner subtle gradient
   const innerGrad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/1.5);
   innerGrad.addColorStop(0, "rgba(100, 80, 180, 0.15)");
   innerGrad.addColorStop(1, "rgba(20, 20, 50, 0)");
@@ -63,23 +48,19 @@ function drawMainMenuFace(ctx, size) {
   ctx.shadowColor = "#8080ff";
   ctx.shadowBlur = 12;
 
-  // Labels on edges
   ctx.fillText("About Me", size/2, 50);
   ctx.fillText("Academics", size/2, size - 50);
-  
   ctx.save();
   ctx.translate(size - 45, size/2);
   ctx.rotate(Math.PI / 2);
   ctx.fillText("Projects", 0, 0);
   ctx.restore();
-  
   ctx.save();
   ctx.translate(45, size/2);
   ctx.rotate(-Math.PI / 2);
   ctx.fillText("Contact", 0, 0);
   ctx.restore();
 
-  // GameCube-style edge glow
   ctx.shadowBlur = 0;
   const edgeGrad = ctx.createLinearGradient(0, 0, size, size);
   edgeGrad.addColorStop(0, "#7b68ee");
@@ -94,8 +75,6 @@ function drawSectionFace(ctx, title, content) {
   const size = 512;
   ctx.fillStyle = "#1a1a2e";
   ctx.fillRect(0, 0, size, size);
-
-  // Subtle gradient overlay
   const grad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/1.4);
   grad.addColorStop(0, "rgba(100, 80, 180, 0.12)");
   grad.addColorStop(1, "rgba(20, 20, 50, 0)");
@@ -119,11 +98,10 @@ function drawSectionFace(ctx, title, content) {
     y += 36;
   }
 
-  // Back hint
   ctx.font = "16px 'Segoe UI', Arial, sans-serif";
   ctx.fillStyle = "#8888bb";
   ctx.shadowBlur = 0;
-  ctx.fillText("Press ESC or click center to return", size/2, size - 50);
+  ctx.fillText("Press ESC or click to return", size/2, size - 50);
 }
 
 function drawBlankFace(ctx, size = 512) {
@@ -131,7 +109,7 @@ function drawBlankFace(ctx, size = 512) {
   ctx.fillRect(0, 0, size, size);
 }
 
-// === Scene/Renderer/Lighting ===
+// ==================== SCENE SETUP ====================
 let width = window.innerWidth, height = window.innerHeight * 0.90;
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(42, width/height, 0.1, 1000);
@@ -146,7 +124,7 @@ renderer.setClearColor(0x000000, 0);
 renderer.setSize(width, height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-// Environment map for reflections - more purple GameCube-like
+// Environment map
 const pmremGenerator = new THREE.PMREMGenerator(renderer);
 const envCanvas = document.createElement('canvas');
 envCanvas.width = envCanvas.height = 256;
@@ -164,98 +142,314 @@ scene.environment = envMap;
 // Lighting
 const ambient = new THREE.AmbientLight(0x9090ff, 0.5);
 scene.add(ambient);
-
 const keyLight = new THREE.DirectionalLight(0xaaaaff, 0.8);
 keyLight.position.set(3, 4, 5);
 scene.add(keyLight);
-
 const rimLight = new THREE.PointLight(0x8060ff, 0.6, 10);
 rimLight.position.set(-3, 2, -3);
 scene.add(rimLight);
 
-// === GameCube-style Material ===
-function makeGCubeMat(faceTexture) {
+// ==================== CUBE MATERIAL ====================
+function makeGCubeMat(faceTexture, introMode = false) {
   return new THREE.MeshPhysicalMaterial({
     map: faceTexture,
     transparent: true,
-    opacity: 0.92,
+    opacity: introMode ? 0.7 : 0.92,
     roughness: 0.08,
     metalness: 0.1,
     clearcoat: 1.0,
     clearcoatRoughness: 0.05,
     reflectivity: 1.0,
     ior: 1.5,
-    transmission: 0.6,
+    transmission: introMode ? 0.8 : 0.6,
     thickness: 1.5,
     envMap: envMap,
-    envMapIntensity: 0.8,
+    envMapIntensity: introMode ? 1.2 : 0.8,
     color: 0xd0d0ff,
-    emissive: 0x201040,
-    emissiveIntensity: 0.15,
+    emissive: introMode ? 0x4020a0 : 0x201040,
+    emissiveIntensity: introMode ? 0.4 : 0.15,
     side: THREE.FrontSide
   });
 }
 
+// ==================== CREATE CUBES ====================
 const geometry = new THREE.BoxGeometry(2.1, 2.1, 2.1);
 
-// Materials array: [+X, -X, +Y, -Y, +Z, -Z]
-const materials = [
-  makeGCubeMat(makeFaceTexture(sections[1].draw)), // +X right (projects)
-  makeGCubeMat(makeFaceTexture(sections[3].draw)), // -X left (contact)
-  makeGCubeMat(makeFaceTexture(sections[4].draw)), // +Y top (about)
-  makeGCubeMat(makeFaceTexture(sections[2].draw)), // -Y bottom (academics)
-  makeGCubeMat(makeFaceTexture(sections[0].draw)), // +Z front (main menu)
-  makeGCubeMat(makeFaceTexture(sections[5].draw)), // -Z back (blank)
+// Intro cube (plain, glowing)
+function makeIntroCubeTexture() {
+  const size = 512;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = "#1a1030";
+  ctx.fillRect(0, 0, size, size);
+  
+  // Subtle G pattern hint
+  const grad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+  grad.addColorStop(0, "rgba(130, 100, 220, 0.3)");
+  grad.addColorStop(0.5, "rgba(80, 60, 160, 0.2)");
+  grad.addColorStop(1, "rgba(30, 20, 60, 0)");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, size, size);
+  
+  return new THREE.CanvasTexture(canvas);
+}
+
+const introTexture = makeIntroCubeTexture();
+const introMaterials = Array(6).fill(null).map(() => makeGCubeMat(introTexture, true));
+const introCube = new THREE.Mesh(geometry, introMaterials);
+introCube.visible = true;
+scene.add(introCube);
+
+// Menu cube (hidden initially)
+const menuMaterials = [
+  makeGCubeMat(makeFaceTexture(sections[1].draw)),
+  makeGCubeMat(makeFaceTexture(sections[3].draw)),
+  makeGCubeMat(makeFaceTexture(sections[4].draw)),
+  makeGCubeMat(makeFaceTexture(sections[2].draw)),
+  makeGCubeMat(makeFaceTexture(sections[0].draw)),
+  makeGCubeMat(makeFaceTexture(sections[5].draw)),
 ];
+const menuCube = new THREE.Mesh(geometry, menuMaterials);
+menuCube.visible = false;
+scene.add(menuCube);
 
-const cube = new THREE.Mesh(geometry, materials);
-scene.add(cube);
+// ==================== INTRO STATE ====================
+let introActive = !SKIP_INTRO;
+let introStartTime = 0;
+let introPhase = 0; // 0: zoom in, 1: spin, 2: settle, 3: transition
 
-// === Menu State/Rotation Logic ===
-let currentFace = 0; // 0=front, 1=right, 2=bottom, 3=left, 4=top
-
+// ==================== MENU STATE ====================
+let currentFace = 0;
 let baseQuat = new THREE.Quaternion();
 let targetQuat = new THREE.Quaternion();
 
-// FIX: Corrected rotations - swapped TOP and BOTTOM X rotations
 const FACE_ROT = [
-  new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, 0)),             // 0: FRONT
-  new THREE.Quaternion().setFromEuler(new THREE.Euler(0, -Math.PI/2, 0)),    // 1: RIGHT
-  new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI/2, 0, 0)),    // 2: BOTTOM (tilt forward)
-  new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI/2, 0)),     // 3: LEFT
-  new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI/2, 0, 0)),     // 4: TOP (tilt back)
+  new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, 0)),
+  new THREE.Quaternion().setFromEuler(new THREE.Euler(0, -Math.PI/2, 0)),
+  new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI/2, 0, 0)),
+  new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI/2, 0)),
+  new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI/2, 0, 0)),
 ];
 
-// === Animation Loop ===
-function animate() {
+// ==================== AUDIO (Optional) ====================
+let audioContext = null;
+
+function playStartupSound() {
+  try {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // Create a synthesized GameCube-like startup sound
+    const now = audioContext.currentTime;
+    
+    // Main chime
+    playTone(391.99, now, 0.8, 0.3);        // G4
+    playTone(523.25, now + 0.15, 0.6, 0.25); // C5
+    playTone(659.25, now + 0.3, 0.5, 0.3);   // E5
+    playTone(783.99, now + 0.5, 0.4, 0.5);   // G5
+    
+    // Bass undertone
+    playTone(98, now, 0.2, 1.2);             // G2 bass
+    
+  } catch(e) {
+    console.log("Audio not supported");
+  }
+}
+
+function playTone(freq, startTime, volume, duration) {
+  const osc = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+  
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+  
+  gain.gain.setValueAtTime(0, startTime);
+  gain.gain.linearRampToValueAtTime(volume, startTime + 0.05);
+  gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+  
+  osc.connect(gain);
+  gain.connect(audioContext.destination);
+  
+  osc.start(startTime);
+  osc.stop(startTime + duration);
+}
+
+// ==================== INTRO ANIMATION ====================
+function updateIntro(time) {
+  const elapsed = time - introStartTime;
+  const progress = Math.min(elapsed / INTRO_DURATION, 1);
+  
+  // Phase timing
+  if (progress < 0.2) {
+    // Phase 0: Cube flies in from distance, spinning
+    introPhase = 0;
+    const p = progress / 0.2;
+    const eased = 1 - Math.pow(1 - p, 3);
+    
+    camera.position.z = 15 - (9.5 * eased);
+    introCube.rotation.x = p * Math.PI * 2;
+    introCube.rotation.y = p * Math.PI * 3;
+    introCube.scale.setScalar(0.3 + 0.7 * eased);
+    
+    // Glow intensity
+    introMaterials.forEach(m => {
+      m.emissiveIntensity = 0.2 + 0.4 * p;
+    });
+    
+  } else if (progress < 0.6) {
+    // Phase 1: Signature spin (like the GC logo reveal)
+    introPhase = 1;
+    const p = (progress - 0.2) / 0.4;
+    const eased = p;
+    
+    camera.position.z = 5.5;
+    introCube.scale.setScalar(1);
+    
+    // Iconic rotation
+    introCube.rotation.x = Math.PI * 2 + eased * Math.PI * 0.5;
+    introCube.rotation.y = Math.PI * 3 + eased * Math.PI * 2;
+    introCube.rotation.z = Math.sin(eased * Math.PI) * 0.3;
+    
+    // Pulsing glow
+    const pulse = Math.sin(p * Math.PI * 4) * 0.2;
+    introMaterials.forEach(m => {
+      m.emissiveIntensity = 0.4 + pulse;
+    });
+    
+  } else if (progress < 0.85) {
+    // Phase 2: Settle into position
+    introPhase = 2;
+    const p = (progress - 0.6) / 0.25;
+    const eased = 1 - Math.pow(1 - p, 2);
+    
+    // Damped oscillation settle
+    const damping = Math.exp(-p * 3);
+    const wobble = Math.sin(p * Math.PI * 6) * damping * 0.2;
+    
+    introCube.rotation.x = Math.PI * 2.5 * (1 - eased) + wobble;
+    introCube.rotation.y = Math.PI * 5 * (1 - eased) + wobble;
+    introCube.rotation.z = wobble * 0.5;
+    
+    introMaterials.forEach(m => {
+      m.emissiveIntensity = 0.4 - 0.25 * p;
+    });
+    
+  } else {
+    // Phase 3: Crossfade to menu cube
+    introPhase = 3;
+    const p = (progress - 0.85) / 0.15;
+    const eased = p * p;
+    
+    introCube.rotation.set(0, 0, 0);
+    
+    // Fade out intro cube
+    introMaterials.forEach(m => {
+      m.opacity = 0.92 * (1 - eased);
+    });
+    
+    // Show and fade in menu cube
+    if (!menuCube.visible) {
+      menuCube.visible = true;
+      menuCube.quaternion.copy(FACE_ROT[0]);
+    }
+    menuMaterials.forEach(m => {
+      m.opacity = 0.92 * eased;
+    });
+  }
+  
+  // Floating motion during intro
+  const floatY = Math.sin(time * 0.002) * 0.1;
+  introCube.position.y = floatY;
+  
+  return progress >= 1;
+}
+
+function endIntro() {
+  introActive = false;
+  introCube.visible = false;
+  menuCube.visible = true;
+  
+  // Reset menu cube materials to full opacity
+  menuMaterials.forEach(m => {
+    m.opacity = 0.92;
+  });
+  
+  // Hide the HTML intro overlay
+  if (window.hideIntroOverlay) {
+    window.hideIntroOverlay();
+  }
+  
+  // Enable controls hint
+  const infoDiv = document.getElementById('cube-info');
+  infoDiv.innerHTML = "<b>Welcome!</b><br>Use arrow keys or click edges to navigate";
+  infoDiv.style.display = "block";
+  
+  setTimeout(() => {
+    if (currentFace === 0) {
+      infoDiv.style.display = "none";
+    }
+  }, 3000);
+}
+
+// ==================== MAIN ANIMATION LOOP ====================
+function animate(time) {
   requestAnimationFrame(animate);
-
-  // Smooth rotation toward target
-  baseQuat.slerp(targetQuat, 0.1);
-
-  // Subtle floating wobble
-  const t = performance.now() * 0.001;
-  const wobbleX = Math.sin(t * 0.8) * 0.02;
-  const wobbleY = Math.cos(t * 0.9) * 0.02;
-  const wobbleQ = new THREE.Quaternion().setFromEuler(new THREE.Euler(wobbleX, wobbleY, 0));
-
-  cube.quaternion.copy(baseQuat).multiply(wobbleQ);
-  cube.position.y = Math.sin(t * 0.7) * 0.05;
-
+  
+  if (introActive) {
+    if (introStartTime === 0) {
+      introStartTime = time;
+      // Play sound on first user interaction
+      document.addEventListener('click', () => {
+        if (!audioContext) playStartupSound();
+      }, { once: true });
+      document.addEventListener('keydown', () => {
+        if (!audioContext) playStartupSound();
+      }, { once: true });
+    }
+    
+    const done = updateIntro(time);
+    if (done) endIntro();
+    
+  } else {
+    // Menu mode
+    baseQuat.slerp(targetQuat, 0.1);
+    
+    const t = time * 0.001;
+    const wobbleX = Math.sin(t * 0.8) * 0.02;
+    const wobbleY = Math.cos(t * 0.9) * 0.02;
+    const wobbleQ = new THREE.Quaternion().setFromEuler(new THREE.Euler(wobbleX, wobbleY, 0));
+    
+    menuCube.quaternion.copy(baseQuat).multiply(wobbleQ);
+    menuCube.position.y = Math.sin(t * 0.7) * 0.05;
+  }
+  
   renderer.render(scene, camera);
 }
-animate();
+animate(0);
 
-// === Keyboard Navigation ===
+// ==================== SKIP INTRO ON CLICK/KEY ====================
+function skipIntro() {
+  if (introActive && introPhase >= 1) {
+    introActive = false;
+    endIntro();
+  }
+}
+
 document.addEventListener('keydown', e => {
+  if (introActive) {
+    if (e.key === "Enter" || e.key === " " || e.key === "Escape") {
+      skipIntro();
+    }
+    return;
+  }
+  
+  // Menu navigation
   if (currentFace === 0) {
-    // On main menu - navigate to sections
-    if (e.key === "ArrowUp") gotoFace(4);      // About Me (top)
-    if (e.key === "ArrowRight") gotoFace(1);   // Projects (right)
-    if (e.key === "ArrowDown") gotoFace(2);    // Academics (bottom)
-    if (e.key === "ArrowLeft") gotoFace(3);    // Contact (left)
+    if (e.key === "ArrowUp") gotoFace(4);
+    if (e.key === "ArrowRight") gotoFace(1);
+    if (e.key === "ArrowDown") gotoFace(2);
+    if (e.key === "ArrowLeft") gotoFace(3);
   } else {
-    // On a section - return with opposite key or Escape
     if (currentFace === 4 && e.key === "ArrowDown") gotoFace(0);
     if (currentFace === 1 && e.key === "ArrowLeft") gotoFace(0);
     if (currentFace === 2 && e.key === "ArrowUp") gotoFace(0);
@@ -264,8 +458,13 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// === Mouse Click Navigation (FIXED: works on all faces) ===
+// ==================== MOUSE CONTROLS ====================
 renderer.domElement.addEventListener('click', function(e) {
+  if (introActive) {
+    skipIntro();
+    return;
+  }
+  
   const rect = renderer.domElement.getBoundingClientRect();
   const mouse = new THREE.Vector2(
     ((e.clientX - rect.left) / rect.width) * 2 - 1,
@@ -274,50 +473,32 @@ renderer.domElement.addEventListener('click', function(e) {
   
   const raycaster = new THREE.Raycaster();
   raycaster.setFromCamera(mouse, camera);
-  const intersects = raycaster.intersectObject(cube);
+  const intersects = raycaster.intersectObject(menuCube);
 
   if (!intersects.length) return;
 
-  // If on a section face, click anywhere to return to menu
   if (currentFace !== 0) {
     gotoFace(0);
     return;
   }
 
-  // On front face - check which edge was clicked
   const face = intersects[0].face;
-  if (face.materialIndex !== 4) return; // Only front face clickable for navigation
+  if (face.materialIndex !== 4) return;
 
   const uv = intersects[0].uv;
-  const u = uv.x;
-  const v = uv.y; // Note: UV y is already correct orientation
+  const u = uv.x, v = uv.y;
+  const edge = 0.25, cMin = 0.35, cMax = 0.65;
+  const inCX = u > cMin && u < cMax;
+  const inCY = v > cMin && v < cMax;
   
-  const edgeMargin = 0.25;
-  const centerMin = 0.35;
-  const centerMax = 0.65;
+  if (inCX && inCY) return;
   
-  // Check if click is in center (do nothing) or on an edge
-  const inCenterX = u > centerMin && u < centerMax;
-  const inCenterY = v > centerMin && v < centerMax;
-  
-  if (inCenterX && inCenterY) {
-    // Clicked center - do nothing on main menu
-    return;
-  }
-  
-  // Determine which edge
-  if (v > 1 - edgeMargin && inCenterX) {
-    gotoFace(4); // Top edge = About Me
-  } else if (u > 1 - edgeMargin && inCenterY) {
-    gotoFace(1); // Right edge = Projects
-  } else if (v < edgeMargin && inCenterX) {
-    gotoFace(2); // Bottom edge = Academics
-  } else if (u < edgeMargin && inCenterY) {
-    gotoFace(3); // Left edge = Contact
-  }
+  if (v > 1 - edge && inCX) gotoFace(4);
+  else if (u > 1 - edge && inCY) gotoFace(1);
+  else if (v < edge && inCX) gotoFace(2);
+  else if (u < edge && inCY) gotoFace(3);
 });
 
-// Change cursor on hover
 renderer.domElement.addEventListener('mousemove', function(e) {
   const rect = renderer.domElement.getBoundingClientRect();
   const mouse = new THREE.Vector2(
@@ -327,15 +508,13 @@ renderer.domElement.addEventListener('mousemove', function(e) {
   
   const raycaster = new THREE.Raycaster();
   raycaster.setFromCamera(mouse, camera);
-  const intersects = raycaster.intersectObject(cube);
+  const target = introActive ? introCube : menuCube;
+  const intersects = raycaster.intersectObject(target);
   
-  if (intersects.length > 0) {
-    renderer.domElement.style.cursor = 'pointer';
-  } else {
-    renderer.domElement.style.cursor = 'default';
-  }
+  renderer.domElement.style.cursor = intersects.length > 0 ? 'pointer' : 'default';
 });
 
+// ==================== NAVIGATION HELPERS ====================
 function gotoFace(idx) {
   targetQuat.copy(FACE_ROT[idx]);
   currentFace = idx;
@@ -352,7 +531,7 @@ function updateInfoPanel(idx) {
   }
 }
 
-// === Responsive Canvas ===
+// ==================== RESPONSIVE ====================
 window.addEventListener('resize', () => {
   width = window.innerWidth;
   height = window.innerHeight * 0.90;
