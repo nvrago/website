@@ -1,10 +1,10 @@
-// === GAMECUBE STARTUP ANIMATION + MENU SYSTEM ===
+// === GAMECUBE MENU - IMPROVED GLASS EFFECT ===
 
-// ==================== CONFIGURATION ====================
-const SKIP_INTRO = false; // Set to true to skip during development
-const INTRO_DURATION = 4500; // Total intro time in ms
+// ==================== CONFIG ====================
+const SKIP_INTRO = false;
+const INTRO_DURATION = 4500;
 
-// ==================== SECTIONS DATA ====================
+// ==================== SECTIONS ====================
 const sections = [
   { face: "menu", draw: drawMainMenuFace },
   { face: "projects", label: "Personal Projects", 
@@ -29,197 +29,288 @@ function makeFaceTexture(drawFn) {
   canvas.width = canvas.height = size;
   const ctx = canvas.getContext('2d');
   drawFn(ctx, size);
-  return new THREE.CanvasTexture(canvas);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.anisotropy = 16;
+  return tex;
 }
 
 function drawMainMenuFace(ctx, size) {
-  ctx.fillStyle = "#1a1a2e";
+  // Darker, more transparent background
+  ctx.fillStyle = "rgba(15, 10, 30, 0.85)";
   ctx.fillRect(0, 0, size, size);
-  const innerGrad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/1.5);
-  innerGrad.addColorStop(0, "rgba(100, 80, 180, 0.15)");
-  innerGrad.addColorStop(1, "rgba(20, 20, 50, 0)");
-  ctx.fillStyle = innerGrad;
+  
+  // Subtle inner glow
+  const glow = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/1.2);
+  glow.addColorStop(0, "rgba(120, 100, 200, 0.15)");
+  glow.addColorStop(0.5, "rgba(80, 60, 160, 0.08)");
+  glow.addColorStop(1, "rgba(20, 15, 40, 0)");
+  ctx.fillStyle = glow;
   ctx.fillRect(0, 0, size, size);
 
-  ctx.font = "bold 38px 'Segoe UI', Arial, sans-serif";
+  ctx.font = "bold 36px 'Segoe UI', Arial, sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillStyle = "#e0e0ff";
-  ctx.shadowColor = "#8080ff";
-  ctx.shadowBlur = 12;
+  ctx.fillStyle = "#e8e8ff";
+  ctx.shadowColor = "#a080ff";
+  ctx.shadowBlur = 15;
 
-  ctx.fillText("About Me", size/2, 50);
-  ctx.fillText("Academics", size/2, size - 50);
+  ctx.fillText("About Me", size/2, 52);
+  ctx.fillText("Academics", size/2, size - 52);
+  
   ctx.save();
-  ctx.translate(size - 45, size/2);
+  ctx.translate(size - 48, size/2);
   ctx.rotate(Math.PI / 2);
   ctx.fillText("Projects", 0, 0);
   ctx.restore();
+  
   ctx.save();
-  ctx.translate(45, size/2);
+  ctx.translate(48, size/2);
   ctx.rotate(-Math.PI / 2);
   ctx.fillText("Contact", 0, 0);
   ctx.restore();
 
+  // Thin elegant border
   ctx.shadowBlur = 0;
-  const edgeGrad = ctx.createLinearGradient(0, 0, size, size);
-  edgeGrad.addColorStop(0, "#7b68ee");
-  edgeGrad.addColorStop(0.5, "#9370db");
-  edgeGrad.addColorStop(1, "#6a5acd");
-  ctx.strokeStyle = edgeGrad;
-  ctx.lineWidth = 3;
-  ctx.strokeRect(15, 15, size-30, size-30);
+  ctx.strokeStyle = "rgba(180, 160, 255, 0.4)";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(12, 12, size-24, size-24);
 }
 
 function drawSectionFace(ctx, title, content) {
   const size = 512;
-  ctx.fillStyle = "#1a1a2e";
+  ctx.fillStyle = "rgba(15, 10, 30, 0.9)";
   ctx.fillRect(0, 0, size, size);
-  const grad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/1.4);
-  grad.addColorStop(0, "rgba(100, 80, 180, 0.12)");
-  grad.addColorStop(1, "rgba(20, 20, 50, 0)");
-  ctx.fillStyle = grad;
+  
+  const glow = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/1.3);
+  glow.addColorStop(0, "rgba(120, 100, 200, 0.12)");
+  glow.addColorStop(1, "rgba(20, 15, 40, 0)");
+  ctx.fillStyle = glow;
   ctx.fillRect(0, 0, size, size);
 
-  ctx.font = "bold 40px 'Segoe UI', Arial, sans-serif";
+  ctx.font = "bold 38px 'Segoe UI', Arial, sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "top";
-  ctx.fillStyle = "#e0e0ff";
-  ctx.shadowColor = "#8080ff";
-  ctx.shadowBlur = 15;
-  ctx.fillText(title, size/2, 70);
+  ctx.fillStyle = "#e8e8ff";
+  ctx.shadowColor = "#a080ff";
+  ctx.shadowBlur = 18;
+  ctx.fillText(title, size/2, 65);
 
-  ctx.font = "22px 'Segoe UI', Arial, sans-serif";
-  ctx.shadowBlur = 6;
+  ctx.font = "21px 'Segoe UI', Arial, sans-serif";
+  ctx.shadowBlur = 8;
   let lines = content.replace(/<br\s*\/?>/g, "\n").split("\n");
-  let y = 160;
+  let y = 155;
   for (let line of lines) {
     ctx.fillText(line, size/2, y);
-    y += 36;
+    y += 34;
   }
 
-  ctx.font = "16px 'Segoe UI', Arial, sans-serif";
-  ctx.fillStyle = "#8888bb";
+  ctx.font = "15px 'Segoe UI', Arial, sans-serif";
+  ctx.fillStyle = "#9999cc";
   ctx.shadowBlur = 0;
-  ctx.fillText("Press ESC or click to return", size/2, size - 50);
+  ctx.fillText("Press ESC or click to return", size/2, size - 48);
 }
 
 function drawBlankFace(ctx, size = 512) {
-  ctx.fillStyle = "#1a1a2e";
+  ctx.fillStyle = "rgba(15, 10, 30, 0.85)";
   ctx.fillRect(0, 0, size, size);
 }
 
 // ==================== SCENE SETUP ====================
 let width = window.innerWidth, height = window.innerHeight * 0.90;
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(42, width/height, 0.1, 1000);
-camera.position.z = 5.5;
+const camera = new THREE.PerspectiveCamera(25, width/height, 0.1, 1000);
+camera.position.set(0, 0.5, 6);
 
 const renderer = new THREE.WebGLRenderer({
   canvas: document.getElementById("cube-canvas"), 
   antialias: true, 
-  alpha: true
+  alpha: true,
+  powerPreference: "high-performance"
 });
-renderer.setClearColor(0x000000, 0);
+renderer.setClearColor(0x151520, 1);
 renderer.setSize(width, height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
 
-// Environment map
+// ==================== HDR-LIKE ENVIRONMENT ====================
 const pmremGenerator = new THREE.PMREMGenerator(renderer);
-const envCanvas = document.createElement('canvas');
-envCanvas.width = envCanvas.height = 256;
-const ectx = envCanvas.getContext('2d');
-const envGrad = ectx.createLinearGradient(0, 0, 256, 256);
-envGrad.addColorStop(0, "#2a1a4a");
-envGrad.addColorStop(0.3, "#4a3a7a");
-envGrad.addColorStop(0.6, "#6a5aaa");
-envGrad.addColorStop(1, "#1a1a3a");
-ectx.fillStyle = envGrad;
-ectx.fillRect(0, 0, 256, 256);
-const envMap = pmremGenerator.fromEquirectangular(new THREE.CanvasTexture(envCanvas)).texture;
-scene.environment = envMap;
+pmremGenerator.compileEquirectangularShader();
 
-// Lighting
-const ambient = new THREE.AmbientLight(0x9090ff, 0.5);
+// Create a more sophisticated environment map
+function createEnvironmentMap() {
+  const size = 512;
+  const canvas = document.createElement('canvas');
+  canvas.width = size * 2;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  
+  // Gradient sky
+  const skyGrad = ctx.createLinearGradient(0, 0, 0, size);
+  skyGrad.addColorStop(0, "#1a1a3a");
+  skyGrad.addColorStop(0.3, "#2a2a5a");
+  skyGrad.addColorStop(0.5, "#4a4a8a");
+  skyGrad.addColorStop(0.7, "#3a3a6a");
+  skyGrad.addColorStop(1, "#151530");
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(0, 0, size * 2, size);
+  
+  // Add some "city lights" spots for reflection interest
+  for (let i = 0; i < 30; i++) {
+    const x = Math.random() * size * 2;
+    const y = size * 0.4 + Math.random() * size * 0.4;
+    const r = 2 + Math.random() * 8;
+    const hue = 200 + Math.random() * 60;
+    
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, r * 3);
+    grad.addColorStop(0, `hsla(${hue}, 70%, 70%, 0.8)`);
+    grad.addColorStop(0.5, `hsla(${hue}, 60%, 50%, 0.3)`);
+    grad.addColorStop(1, "transparent");
+    ctx.fillStyle = grad;
+    ctx.fillRect(x - r * 3, y - r * 3, r * 6, r * 6);
+  }
+  
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.mapping = THREE.EquirectangularReflectionMapping;
+  return pmremGenerator.fromEquirectangular(texture).texture;
+}
+
+const envMap = createEnvironmentMap();
+scene.environment = envMap;
+scene.background = new THREE.Color(0x151520);
+
+// ==================== LIGHTING ====================
+const ambient = new THREE.AmbientLight(0xffffff, 0.4);
 scene.add(ambient);
-const keyLight = new THREE.DirectionalLight(0xaaaaff, 0.8);
-keyLight.position.set(3, 4, 5);
+
+const keyLight = new THREE.SpotLight(0xffffff, 1.5);
+keyLight.position.set(5, 8, 10);
+keyLight.angle = Math.PI / 6;
+keyLight.penumbra = 1;
 scene.add(keyLight);
-const rimLight = new THREE.PointLight(0x8060ff, 0.6, 10);
-rimLight.position.set(-3, 2, -3);
+
+const fillLight = new THREE.PointLight(0x8080ff, 0.5);
+fillLight.position.set(-5, -3, 5);
+scene.add(fillLight);
+
+const rimLight = new THREE.PointLight(0xff80ff, 0.3);
+rimLight.position.set(0, 5, -5);
 scene.add(rimLight);
 
-// ==================== CUBE MATERIAL ====================
-function makeGCubeMat(faceTexture, introMode = false) {
+// ==================== ROUNDED BOX GEOMETRY ====================
+// Create rounded box using BufferGeometry manipulation
+function createRoundedBoxGeometry(width, height, depth, radius, segments) {
+  // Use a simpler approach: BoxGeometry with beveled edges via shader or just standard box
+  // For true rounded corners, we'd need more complex geometry
+  // Three.js doesn't have built-in RoundedBox, so we'll use regular box with material tricks
+  return new THREE.BoxGeometry(width, height, depth, segments, segments, segments);
+}
+
+const geometry = createRoundedBoxGeometry(2.0, 2.0, 2.0, 0.1, 2);
+
+// ==================== GLASS MATERIAL (Enhanced) ====================
+function makeGlassMaterial(faceTexture, isIntro = false) {
   return new THREE.MeshPhysicalMaterial({
     map: faceTexture,
+    
+    // Transmission (glass effect)
     transparent: true,
-    opacity: introMode ? 0.7 : 0.92,
-    roughness: 0.08,
-    metalness: 0.1,
+    transmission: isIntro ? 0.95 : 0.85,
+    opacity: 1,
+    
+    // Surface properties
+    roughness: 0.05,
+    metalness: 0,
+    
+    // Clearcoat (adds that polished layer)
     clearcoat: 1.0,
-    clearcoatRoughness: 0.05,
-    reflectivity: 1.0,
-    ior: 1.5,
-    transmission: introMode ? 0.8 : 0.6,
-    thickness: 1.5,
+    clearcoatRoughness: 0.03,
+    
+    // Refraction
+    ior: 1.45,
+    thickness: 0.5,
+    
+    // IRIDESCENCE - the rainbow shimmer!
+    iridescence: 1.0,
+    iridescenceIOR: 1.3,
+    iridescenceThicknessRange: [100, 800],
+    
+    // Reflections
     envMap: envMap,
-    envMapIntensity: introMode ? 1.2 : 0.8,
-    color: 0xd0d0ff,
-    emissive: introMode ? 0x4020a0 : 0x201040,
-    emissiveIntensity: introMode ? 0.4 : 0.15,
-    side: THREE.FrontSide
+    envMapIntensity: 1.5,
+    reflectivity: 1.0,
+    
+    // Color tint
+    color: isIntro ? 0xd0d0ff : 0xffffff,
+    
+    // Slight emission for that glow
+    emissive: isIntro ? 0x301060 : 0x100830,
+    emissiveIntensity: isIntro ? 0.3 : 0.1,
+    
+    // Render both sides for proper glass look
+    side: THREE.FrontSide,
+    
+    // Better shadows
+    depthWrite: true,
   });
 }
 
-// ==================== CREATE CUBES ====================
-const geometry = new THREE.BoxGeometry(2.1, 2.1, 2.1);
+// ==================== BACKSIDE CUBE (for transmission effect) ====================
+// Create an inner cube that renders the backside
+const backsideGeometry = new THREE.BoxGeometry(1.98, 1.98, 1.98);
+const backsideMaterial = new THREE.MeshPhysicalMaterial({
+  color: 0x1a1030,
+  transparent: true,
+  opacity: 0.3,
+  side: THREE.BackSide,
+  roughness: 0.1,
+});
+const backsideCube = new THREE.Mesh(backsideGeometry, backsideMaterial);
+scene.add(backsideCube);
 
-// Intro cube (plain, glowing)
-function makeIntroCubeTexture() {
+// ==================== CREATE CUBES ====================
+// Intro cube
+function makeIntroTexture() {
   const size = 512;
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = size;
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = "#1a1030";
+  ctx.fillStyle = "rgba(20, 15, 40, 0.6)";
   ctx.fillRect(0, 0, size, size);
   
-  // Subtle G pattern hint
-  const grad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
-  grad.addColorStop(0, "rgba(130, 100, 220, 0.3)");
-  grad.addColorStop(0.5, "rgba(80, 60, 160, 0.2)");
-  grad.addColorStop(1, "rgba(30, 20, 60, 0)");
-  ctx.fillStyle = grad;
+  const glow = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+  glow.addColorStop(0, "rgba(150, 120, 255, 0.25)");
+  glow.addColorStop(0.6, "rgba(100, 80, 200, 0.1)");
+  glow.addColorStop(1, "rgba(30, 20, 60, 0)");
+  ctx.fillStyle = glow;
   ctx.fillRect(0, 0, size, size);
   
   return new THREE.CanvasTexture(canvas);
 }
 
-const introTexture = makeIntroCubeTexture();
-const introMaterials = Array(6).fill(null).map(() => makeGCubeMat(introTexture, true));
+const introTexture = makeIntroTexture();
+const introMaterials = Array(6).fill(null).map(() => makeGlassMaterial(introTexture, true));
 const introCube = new THREE.Mesh(geometry, introMaterials);
 introCube.visible = true;
 scene.add(introCube);
 
-// Menu cube (hidden initially)
+// Menu cube
 const menuMaterials = [
-  makeGCubeMat(makeFaceTexture(sections[1].draw)),
-  makeGCubeMat(makeFaceTexture(sections[3].draw)),
-  makeGCubeMat(makeFaceTexture(sections[4].draw)),
-  makeGCubeMat(makeFaceTexture(sections[2].draw)),
-  makeGCubeMat(makeFaceTexture(sections[0].draw)),
-  makeGCubeMat(makeFaceTexture(sections[5].draw)),
+  makeGlassMaterial(makeFaceTexture(sections[1].draw)),
+  makeGlassMaterial(makeFaceTexture(sections[3].draw)),
+  makeGlassMaterial(makeFaceTexture(sections[4].draw)),
+  makeGlassMaterial(makeFaceTexture(sections[2].draw)),
+  makeGlassMaterial(makeFaceTexture(sections[0].draw)),
+  makeGlassMaterial(makeFaceTexture(sections[5].draw)),
 ];
 const menuCube = new THREE.Mesh(geometry, menuMaterials);
 menuCube.visible = false;
 scene.add(menuCube);
 
-// ==================== INTRO STATE ====================
+// ==================== MENU STATE ====================
 let introActive = !SKIP_INTRO;
 let introStartTime = 0;
-let introPhase = 0; // 0: zoom in, 1: spin, 2: settle, 3: transition
-
-// ==================== MENU STATE ====================
+let introPhase = 0;
 let currentFace = 0;
 let baseQuat = new THREE.Quaternion();
 let targetQuat = new THREE.Quaternion();
@@ -232,46 +323,33 @@ const FACE_ROT = [
   new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI/2, 0, 0)),
 ];
 
-// ==================== AUDIO (Optional) ====================
+// ==================== AUDIO ====================
 let audioContext = null;
 
 function playStartupSound() {
   try {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    
-    // Create a synthesized GameCube-like startup sound
     const now = audioContext.currentTime;
     
-    // Main chime
-    playTone(391.99, now, 0.8, 0.3);        // G4
-    playTone(523.25, now + 0.15, 0.6, 0.25); // C5
-    playTone(659.25, now + 0.3, 0.5, 0.3);   // E5
-    playTone(783.99, now + 0.5, 0.4, 0.5);   // G5
-    
-    // Bass undertone
-    playTone(98, now, 0.2, 1.2);             // G2 bass
-    
-  } catch(e) {
-    console.log("Audio not supported");
-  }
+    [391.99, 523.25, 659.25, 783.99].forEach((freq, i) => {
+      playTone(freq, now + i * 0.15, 0.3 - i * 0.05, 0.4);
+    });
+    playTone(98, now, 0.15, 1.2);
+  } catch(e) {}
 }
 
-function playTone(freq, startTime, volume, duration) {
+function playTone(freq, start, vol, dur) {
   const osc = audioContext.createOscillator();
   const gain = audioContext.createGain();
-  
   osc.type = 'sine';
   osc.frequency.value = freq;
-  
-  gain.gain.setValueAtTime(0, startTime);
-  gain.gain.linearRampToValueAtTime(volume, startTime + 0.05);
-  gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-  
+  gain.gain.setValueAtTime(0, start);
+  gain.gain.linearRampToValueAtTime(vol, start + 0.03);
+  gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
   osc.connect(gain);
   gain.connect(audioContext.destination);
-  
-  osc.start(startTime);
-  osc.stop(startTime + duration);
+  osc.start(start);
+  osc.stop(start + dur);
 }
 
 // ==================== INTRO ANIMATION ====================
@@ -279,87 +357,83 @@ function updateIntro(time) {
   const elapsed = time - introStartTime;
   const progress = Math.min(elapsed / INTRO_DURATION, 1);
   
-  // Phase timing
   if (progress < 0.2) {
-    // Phase 0: Cube flies in from distance, spinning
     introPhase = 0;
     const p = progress / 0.2;
-    const eased = 1 - Math.pow(1 - p, 3);
+    const ease = 1 - Math.pow(1 - p, 3);
     
-    camera.position.z = 15 - (9.5 * eased);
+    camera.position.z = 12 - 6 * ease;
     introCube.rotation.x = p * Math.PI * 2;
     introCube.rotation.y = p * Math.PI * 3;
-    introCube.scale.setScalar(0.3 + 0.7 * eased);
+    introCube.scale.setScalar(0.2 + 0.8 * ease);
+    backsideCube.scale.copy(introCube.scale);
+    backsideCube.rotation.copy(introCube.rotation);
     
-    // Glow intensity
     introMaterials.forEach(m => {
-      m.emissiveIntensity = 0.2 + 0.4 * p;
+      m.iridescence = 0.5 + p * 0.5;
+      m.emissiveIntensity = 0.2 + p * 0.3;
     });
     
   } else if (progress < 0.6) {
-    // Phase 1: Signature spin (like the GC logo reveal)
     introPhase = 1;
     const p = (progress - 0.2) / 0.4;
-    const eased = p;
     
-    camera.position.z = 5.5;
+    camera.position.z = 6;
     introCube.scale.setScalar(1);
+    backsideCube.scale.setScalar(1);
     
-    // Iconic rotation
-    introCube.rotation.x = Math.PI * 2 + eased * Math.PI * 0.5;
-    introCube.rotation.y = Math.PI * 3 + eased * Math.PI * 2;
-    introCube.rotation.z = Math.sin(eased * Math.PI) * 0.3;
+    introCube.rotation.x = Math.PI * 2 + p * Math.PI * 0.5;
+    introCube.rotation.y = Math.PI * 3 + p * Math.PI * 2;
+    introCube.rotation.z = Math.sin(p * Math.PI) * 0.25;
+    backsideCube.rotation.copy(introCube.rotation);
     
-    // Pulsing glow
-    const pulse = Math.sin(p * Math.PI * 4) * 0.2;
+    const pulse = Math.sin(p * Math.PI * 5) * 0.3;
     introMaterials.forEach(m => {
-      m.emissiveIntensity = 0.4 + pulse;
+      m.emissiveIntensity = 0.3 + pulse;
+      m.iridescence = 0.8 + Math.sin(p * Math.PI * 3) * 0.2;
     });
     
   } else if (progress < 0.85) {
-    // Phase 2: Settle into position
     introPhase = 2;
     const p = (progress - 0.6) / 0.25;
-    const eased = 1 - Math.pow(1 - p, 2);
+    const ease = 1 - Math.pow(1 - p, 2);
+    const damp = Math.exp(-p * 4);
+    const wobble = Math.sin(p * Math.PI * 8) * damp * 0.15;
     
-    // Damped oscillation settle
-    const damping = Math.exp(-p * 3);
-    const wobble = Math.sin(p * Math.PI * 6) * damping * 0.2;
-    
-    introCube.rotation.x = Math.PI * 2.5 * (1 - eased) + wobble;
-    introCube.rotation.y = Math.PI * 5 * (1 - eased) + wobble;
+    introCube.rotation.x = Math.PI * 2.5 * (1 - ease) + wobble;
+    introCube.rotation.y = Math.PI * 5 * (1 - ease) + wobble;
     introCube.rotation.z = wobble * 0.5;
+    backsideCube.rotation.copy(introCube.rotation);
     
     introMaterials.forEach(m => {
-      m.emissiveIntensity = 0.4 - 0.25 * p;
+      m.emissiveIntensity = 0.5 - p * 0.3;
     });
     
   } else {
-    // Phase 3: Crossfade to menu cube
     introPhase = 3;
     const p = (progress - 0.85) / 0.15;
-    const eased = p * p;
     
     introCube.rotation.set(0, 0, 0);
+    backsideCube.rotation.set(0, 0, 0);
     
-    // Fade out intro cube
     introMaterials.forEach(m => {
-      m.opacity = 0.92 * (1 - eased);
+      m.opacity = 1 - p;
+      m.transmission = 0.95 - p * 0.3;
     });
     
-    // Show and fade in menu cube
     if (!menuCube.visible) {
       menuCube.visible = true;
       menuCube.quaternion.copy(FACE_ROT[0]);
     }
+    
     menuMaterials.forEach(m => {
-      m.opacity = 0.92 * eased;
+      m.opacity = p;
     });
   }
   
-  // Floating motion during intro
-  const floatY = Math.sin(time * 0.002) * 0.1;
+  const floatY = Math.sin(time * 0.002) * 0.08;
   introCube.position.y = floatY;
+  backsideCube.position.y = floatY;
   
   return progress >= 1;
 }
@@ -368,66 +442,49 @@ function endIntro() {
   introActive = false;
   introCube.visible = false;
   menuCube.visible = true;
+  backsideCube.visible = true;
   
-  // Reset menu cube materials to full opacity
-  menuMaterials.forEach(m => {
-    m.opacity = 0.92;
-  });
+  menuMaterials.forEach(m => { m.opacity = 1; });
   
-  // Hide the HTML intro overlay
-  if (window.hideIntroOverlay) {
-    window.hideIntroOverlay();
-  }
+  if (window.hideIntroOverlay) window.hideIntroOverlay();
   
-  // Enable controls hint
   const infoDiv = document.getElementById('cube-info');
   infoDiv.innerHTML = "<b>Welcome!</b><br>Use arrow keys or click edges to navigate";
   infoDiv.style.display = "block";
-  
-  setTimeout(() => {
-    if (currentFace === 0) {
-      infoDiv.style.display = "none";
-    }
-  }, 3000);
+  setTimeout(() => { if (currentFace === 0) infoDiv.style.display = "none"; }, 3000);
 }
 
-// ==================== MAIN ANIMATION LOOP ====================
+// ==================== ANIMATION LOOP ====================
 function animate(time) {
   requestAnimationFrame(animate);
   
   if (introActive) {
     if (introStartTime === 0) {
       introStartTime = time;
-      // Play sound on first user interaction
-      document.addEventListener('click', () => {
-        if (!audioContext) playStartupSound();
-      }, { once: true });
-      document.addEventListener('keydown', () => {
-        if (!audioContext) playStartupSound();
-      }, { once: true });
+      document.addEventListener('click', () => { if (!audioContext) playStartupSound(); }, { once: true });
+      document.addEventListener('keydown', () => { if (!audioContext) playStartupSound(); }, { once: true });
     }
-    
-    const done = updateIntro(time);
-    if (done) endIntro();
-    
+    if (updateIntro(time)) endIntro();
   } else {
-    // Menu mode
     baseQuat.slerp(targetQuat, 0.1);
     
     const t = time * 0.001;
-    const wobbleX = Math.sin(t * 0.8) * 0.02;
-    const wobbleY = Math.cos(t * 0.9) * 0.02;
+    const wobbleX = Math.sin(t * 0.7) * 0.015;
+    const wobbleY = Math.cos(t * 0.8) * 0.015;
     const wobbleQ = new THREE.Quaternion().setFromEuler(new THREE.Euler(wobbleX, wobbleY, 0));
     
     menuCube.quaternion.copy(baseQuat).multiply(wobbleQ);
-    menuCube.position.y = Math.sin(t * 0.7) * 0.05;
+    menuCube.position.y = Math.sin(t * 0.6) * 0.04;
+    
+    backsideCube.quaternion.copy(menuCube.quaternion);
+    backsideCube.position.copy(menuCube.position);
   }
   
   renderer.render(scene, camera);
 }
 animate(0);
 
-// ==================== SKIP INTRO ON CLICK/KEY ====================
+// ==================== CONTROLS ====================
 function skipIntro() {
   if (introActive && introPhase >= 1) {
     introActive = false;
@@ -437,13 +494,10 @@ function skipIntro() {
 
 document.addEventListener('keydown', e => {
   if (introActive) {
-    if (e.key === "Enter" || e.key === " " || e.key === "Escape") {
-      skipIntro();
-    }
+    if (["Enter", " ", "Escape"].includes(e.key)) skipIntro();
     return;
   }
   
-  // Menu navigation
   if (currentFace === 0) {
     if (e.key === "ArrowUp") gotoFace(4);
     if (e.key === "ArrowRight") gotoFace(1);
@@ -458,12 +512,8 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// ==================== MOUSE CONTROLS ====================
 renderer.domElement.addEventListener('click', function(e) {
-  if (introActive) {
-    skipIntro();
-    return;
-  }
+  if (introActive) { skipIntro(); return; }
   
   const rect = renderer.domElement.getBoundingClientRect();
   const mouse = new THREE.Vector2(
@@ -474,29 +524,23 @@ renderer.domElement.addEventListener('click', function(e) {
   const raycaster = new THREE.Raycaster();
   raycaster.setFromCamera(mouse, camera);
   const intersects = raycaster.intersectObject(menuCube);
-
+  
   if (!intersects.length) return;
-
-  if (currentFace !== 0) {
-    gotoFace(0);
-    return;
-  }
-
+  if (currentFace !== 0) { gotoFace(0); return; }
+  
   const face = intersects[0].face;
   if (face.materialIndex !== 4) return;
-
+  
   const uv = intersects[0].uv;
   const u = uv.x, v = uv.y;
   const edge = 0.25, cMin = 0.35, cMax = 0.65;
-  const inCX = u > cMin && u < cMax;
-  const inCY = v > cMin && v < cMax;
   
-  if (inCX && inCY) return;
+  if (u > cMin && u < cMax && v > cMin && v < cMax) return;
   
-  if (v > 1 - edge && inCX) gotoFace(4);
-  else if (u > 1 - edge && inCY) gotoFace(1);
-  else if (v < edge && inCX) gotoFace(2);
-  else if (u < edge && inCY) gotoFace(3);
+  if (v > 1 - edge && u > cMin && u < cMax) gotoFace(4);
+  else if (u > 1 - edge && v > cMin && v < cMax) gotoFace(1);
+  else if (v < edge && u > cMin && u < cMax) gotoFace(2);
+  else if (u < edge && v > cMin && v < cMax) gotoFace(3);
 });
 
 renderer.domElement.addEventListener('mousemove', function(e) {
@@ -505,16 +549,12 @@ renderer.domElement.addEventListener('mousemove', function(e) {
     ((e.clientX - rect.left) / rect.width) * 2 - 1,
     -((e.clientY - rect.top) / rect.height) * 2 + 1
   );
-  
   const raycaster = new THREE.Raycaster();
   raycaster.setFromCamera(mouse, camera);
   const target = introActive ? introCube : menuCube;
-  const intersects = raycaster.intersectObject(target);
-  
-  renderer.domElement.style.cursor = intersects.length > 0 ? 'pointer' : 'default';
+  renderer.domElement.style.cursor = raycaster.intersectObject(target).length ? 'pointer' : 'default';
 });
 
-// ==================== NAVIGATION HELPERS ====================
 function gotoFace(idx) {
   targetQuat.copy(FACE_ROT[idx]);
   currentFace = idx;
@@ -531,7 +571,6 @@ function updateInfoPanel(idx) {
   }
 }
 
-// ==================== RESPONSIVE ====================
 window.addEventListener('resize', () => {
   width = window.innerWidth;
   height = window.innerHeight * 0.90;
