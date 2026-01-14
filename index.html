@@ -2,19 +2,74 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Rago Industries Menu (3D Cube)</title>
+  <title>Rago Industries</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Portfolio by Rago - GameCube inspired menu">
   <link rel="stylesheet" href="css_elements/style.css">
+  
+  <!-- Preload for smoother experience -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
 </head>
 <body>
+  <!-- Intro Overlay (fades out after animation) -->
+  <div id="intro-overlay">
+    <div id="intro-text">Loading...</div>
+  </div>
+  
+  <!-- Skip Hint -->
+  <div id="skip-hint">Press SPACE or ENTER to skip</div>
+  
+  <!-- Main Cube Container -->
   <div id="cube-container">
     <canvas id="cube-canvas"></canvas>
     <div id="cube-info"></div>
   </div>
+  
+  <!-- Navigation Hints (shown after intro) -->
+  <div id="nav-hints">
+    Use arrow keys or click edges to navigate
+  </div>
+  
   <footer>
     <small>Portfolio project by Rago.</small>
   </footer>
+  
+  <!-- Three.js -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+  
+  <!-- Main Script -->
   <script src="js_elements/menu.js"></script>
+  
+  <!-- Intro Overlay Controller -->
+  <script>
+    // Hide intro overlay when animation completes
+    const introOverlay = document.getElementById('intro-overlay');
+    const skipHint = document.getElementById('skip-hint');
+    const navHints = document.getElementById('nav-hints');
+    
+    // Update intro text during loading
+    window.addEventListener('load', () => {
+      document.getElementById('intro-text').textContent = 'Click or press any key';
+    });
+    
+    // Function called from menu.js when intro ends
+    window.hideIntroOverlay = function() {
+      introOverlay.classList.add('hidden');
+      skipHint.style.display = 'none';
+      
+      // Show nav hints briefly
+      setTimeout(() => {
+        navHints.classList.add('visible');
+        setTimeout(() => {
+          navHints.classList.remove('visible');
+        }, 4000);
+      }, 500);
+      
+      // Remove overlay from DOM after fade
+      setTimeout(() => {
+        introOverlay.style.display = 'none';
+      }, 500);
+    };
+  </script>
 </body>
 </html>
