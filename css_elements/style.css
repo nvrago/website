@@ -1,11 +1,15 @@
+/* === BASE STYLES === */
 html, body {
   width: 100%;
   height: 100%;
   margin: 0;
   padding: 0;
-  background: #090e19;
+  background: linear-gradient(135deg, #0a0612 0%, #1a1030 50%, #0d0818 100%);
   overflow: hidden;
+  font-family: 'Segoe UI', Arial, sans-serif;
 }
+
+/* === CUBE CONTAINER === */
 #cube-container {
   position: relative;
   width: 100vw;
@@ -14,39 +18,185 @@ html, body {
   align-items: center;
   justify-content: center;
 }
+
 #cube-canvas {
   width: 100vw;
   height: 90vh;
   display: block;
   background: transparent;
 }
+
+/* === INFO PANEL === */
 #cube-info {
   position: absolute;
   left: 50%;
-  top: 65vh;
+  bottom: 12vh;
   transform: translateX(-50%);
   width: 380px;
+  max-width: 90vw;
   min-height: 60px;
-  background: rgba(22,24,40,0.84);
-  border-radius: 16px;
-  box-shadow: 0 3px 12px #0004;
-  color: #eaf4fc;
-  padding: 1.5em 1.2em;
+  background: rgba(20, 15, 40, 0.9);
+  border: 1px solid rgba(130, 100, 220, 0.3);
+  border-radius: 12px;
+  box-shadow: 
+    0 4px 20px rgba(100, 80, 180, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  color: #e0e0ff;
+  padding: 1.2em 1.5em;
   text-align: center;
-  font-size: 1.12rem;
-  font-family: 'Segoe UI', Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
   display: none;
+  animation: fadeIn 0.3s ease-out;
 }
+
+#cube-info b {
+  color: #c0b0ff;
+  font-size: 1.1em;
+}
+
+/* === INTRO OVERLAY === */
+#intro-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(ellipse at center, #1a1030 0%, #0a0612 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 1;
+  transition: opacity 0.5s ease-out;
+  pointer-events: none;
+}
+
+#intro-overlay.hidden {
+  opacity: 0;
+}
+
+#intro-text {
+  position: absolute;
+  bottom: 15vh;
+  color: rgba(200, 180, 255, 0.6);
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* === SKIP HINT === */
+#skip-hint {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  color: rgba(200, 180, 255, 0.4);
+  font-size: 0.8rem;
+  z-index: 101;
+  opacity: 0;
+  animation: fadeInDelay 0.5s ease-out 1.5s forwards;
+}
+
+/* === FOOTER === */
 footer {
   text-align: center;
-  color: #bbc;
-  font-size: 0.95rem;
+  color: #8888bb;
+  font-size: 0.85rem;
   opacity: 0.7;
-  padding-bottom: 0.7em;
+  padding: 0.8em;
   position: fixed;
   width: 100vw;
   bottom: 0;
   left: 0;
-  background: transparent;
+  background: linear-gradient(transparent, rgba(10, 6, 18, 0.8));
   z-index: 10;
+}
+
+/* === NAVIGATION HINTS === */
+#nav-hints {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(200, 180, 255, 0.5);
+  font-size: 0.85rem;
+  text-align: center;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+#nav-hints.visible {
+  opacity: 1;
+}
+
+/* === ANIMATIONS === */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes fadeInDelay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes glow {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(130, 100, 220, 0.3);
+  }
+  50% { 
+    box-shadow: 0 0 40px rgba(130, 100, 220, 0.6);
+  }
+}
+
+/* === PARTICLE BACKGROUND (optional enhancement) === */
+#particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 600px) {
+  #cube-info {
+    width: 90vw;
+    padding: 1em;
+    font-size: 0.9rem;
+    bottom: 8vh;
+  }
+  
+  #intro-text {
+    font-size: 0.75rem;
+    bottom: 10vh;
+  }
+  
+  footer {
+    font-size: 0.75rem;
+  }
+}
+
+/* === LOADING STATE === */
+.loading #cube-canvas {
+  opacity: 0;
+}
+
+/* === CURSOR STYLES === */
+#cube-canvas {
+  cursor: default;
+}
+
+#cube-canvas:hover {
+  cursor: pointer;
 }
